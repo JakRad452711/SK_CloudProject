@@ -7,7 +7,7 @@
 #include "TCPServer.h"
 #include "../../Errors.h"
 
-int main(int argv, char** argc) {
+int main(int argc, char** argv) {
 	// variables
 
 	puts("TCP client program started");
@@ -15,7 +15,7 @@ int main(int argv, char** argc) {
 	if(argc < 2) {
 		puts("too few arguments were entered");
 		puts("please enter server's id and a port number as arguments");
-		return ERROR_WRONG_INPUT;
+		return ERROR_BAD_ARGUMENTS;
 	}
 
 	// rest of the definition
@@ -38,27 +38,27 @@ int sendDataThroughThePipe(char* buffer, int bufferSizeInBytes) {
 	return 0;
 }
 
-int sendResponseFormTCP(int socketFD, char* aForm, int formSizeInBytes) {
+int sendResponseFormTCP(int socketFd, char* aForm, int formSizeInBytes) {
 	// definition
 	return 0;
 }
 
-int sendFileSizeTCP(int socketFD, FILE* aFile, long maxSizeInBytes) {
+int sendFileSizeTCP(int socketFd, FILE* aFile, long maxSizeInBytes) {
 	// definition
 	return 0;
 }
 
-int sendFileTCP(int socketFD, char* fileName, FILE* aFile, int bufferSizeInBytes) {
+int sendFileTCP(int socketFd, char* fileName, FILE* aFile, int bufferSizeInBytes) {
 	// definition
 	return 0;
 }
 
-int receiveResponseFormTCP(int socketFD, char* buffer, int formSizeInBytes) {
+int receiveResponseFormTCP(int socketFd, char* buffer, int formSizeInBytes) {
 	// definition
 	return 0;
 }
 
-int downloadFileTCP(int socketFD, char* fileName, int bufferSizeInBytes) {
+int downloadFileTCP(int socketFd, char* fileName, int bufferSizeInBytes) {
 	// definition
 	return 0;
 }

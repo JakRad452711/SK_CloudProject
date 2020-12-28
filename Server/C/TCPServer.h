@@ -17,27 +17,27 @@ int receiveDataThroughThePipe(char* buffer, int bufferSizeInBytes);
 // sends data from "buffer" through the named pipe created by the handleNamedPipes function
 // sends "bufferSizeInBytes" bytes to the c# server module
 // returns 0 on success, or other values if an error occures
-int sendDataThroughThePipe(char* buffer, int bufferSizeInBytes)
+int sendDataThroughThePipe(char* buffer, int bufferSizeInBytes);
 
-// sends a response form through a "socketFD" using TCP protocol
+// sends a response form through a "socketFd" using TCP protocol
 // returns 0 on success, or other values if an error occures
-int sendResponseFormTCP(int socketFD, char* aForm, int formSizeInBytes);
+int sendResponseFormTCP(int socketFd, char* aForm, int formSizeInBytes);
 
-// sends "aFile"s size in byte's through a "socketFD" socket using TCP protocol
+// sends "aFile"s size in byte's through a "socketFd" socket using TCP protocol
 // if "aFile" size exceeds "maxSizeInBytes" size then an error is returned
 // returns 0 on success, or other values if an error occures
-int sendFileSizeTCP(int socketFD, FILE* aFile, long maxSizeInBytes);
+int sendFileSizeTCP(int socketFd, FILE* aFile, long maxSizeInBytes);
 
-// sends "aFile" through a "socketFD" using TCP protocol
+// sends "aFile" through a "socketFd" using TCP protocol
 // the function sends multiple packets of "bufferSizeInBytes" size
 // returns 0 on success, or other values if an error occurres
-int sendFileTCP(int socketFD, char* fileName, FILE* aFile, int bufferSizeInBytes);
+int sendFileTCP(int socketFd, char* fileName, FILE* aFile, int bufferSizeInBytes);
 
 // receives response sent after sending of a request form using TCP protocol
 // the response is saved in the "buffer"
 // returns 0 on success, or other values if an error occures
-int receiveResponseFormTCP(int socketFD, char* buffer, int formSizeInBytes);
+int receiveResponseFormTCP(int socketFd, char* buffer, int formSizeInBytes);
 
-// downloads a file from a server through a "socketFD" using TCP protocol
+// downloads a file from a server through a "socketFd" using TCP protocol
 // returns 0 on success, or other values if an error occures
-int downloadFileTCP(int socketFD, char* fileName, int bufferSizeInBytes);
+int downloadFileTCP(int socketFd, char* fileName, int bufferSizeInBytes);

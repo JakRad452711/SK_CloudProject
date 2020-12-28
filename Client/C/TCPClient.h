@@ -4,40 +4,43 @@
 // this library contains headers for functions used in a TCPClient program.
 */
 
-// creates a named pipe that needs to be handeled
-// connects to a named pipe created by the c# client module
+// opens pipes created by c# module and saves their descriptors to variables
 // returns 0 on success, or other values if an error occures
-int handleNamedPipes();
+int handleNamedPipes(int* namedPipeCToJavaFd, int* namedPipeJavaToCFd);
 
 // receives data from the pipe created by the c# client module
 // saves the data in "buffer"
 // returns 0 on success, or other values if an error occures
-int receiveDataThroughThePipe(char* buffer, int bufferSizeInBytes);
+int receiveDataThroughThePipe(int aPipe, char* buffer, int bufferSizeInBytes);
 
 // sends data from "buffer" through the named pipe created by the handleNamedPipes function
 // sends "bufferSizeInBytes" bytes to the c# client module
 // returns 0 on success, or other values if an error occures
-int sendDataThroughThePipe(char* buffer, int bufferSizeInBytes)
+int sendDataThroughThePipe(int aPipe, char* buffer, int bufferSizeInBytes);
 
-// sends a request form through a "socketFD" using TCP protocol
+// sends a request form through a "socketFd" using TCP protocol
 // returns 0 on success, or other values if an error occures
-int sendRequestFormTCP(int socketFD, char* aForm, int formSizeInBytes);
+int sendRequestFormTCP(int socketFd, char* aForm, int formSizeInBytes);
 
-// sends "aFile"s size in byte's through a "socketFD" socket using TCP protocol
+// sends "aFile"s size in byte's through a "socketFd" socket using TCP protocol
 // if "aFile" size exceeds "maxSizeInBytes" size then an error is returned
 // returns 0 on success, or other values if an error occures
-int sendFileSizeTCP(int socketFD, FILE* aFile, long maxSizeInBytes);
+int sendFileSizeTCP(int socketFd, FILE* aFile, long maxSizeInBytes);
 
-// sends "aFile" through a "socketFD" using TCP protocol
+// sends "aFile" through a "socketFd" using TCP protocol
 // the function sends multiple packets of "bufferSizeInBytes" size
 // returns 0 on success, or other values if an error occurres
-int sendFileTCP(int socketFD, char* fileName, FILE* aFile, int bufferSizeInBytes);
+int sendFileTCP(int socketFd, char* fileName, FILE* aFile, int bufferSizeInBytes);
 
 // receives response sent after sending of a request form using TCP protocol
 // the response is saved in the "buffer"
 // returns 0 on success, or other values if an error occures
-int receiveResponseFormTCP(int socketFD, char* buffer, int formSizeInBytes);
+int receiveResponseFormTCP(int socketFd, char* buffer, int formSizeInBytes);
 
-// downloads a file from a server through a "socketFD" using TCP protocol
+// receives files size and saves it to "fileSize"
 // returns 0 on success, or other values if an error occures
-int downloadFileTCP(int socketFD, char* fileName, int bufferSizeInBytes);
+int receiveFileSizeTCP(int socketFd, long* fileSize);
+
+// downloads a file from a server through a "socketFd" using TCP protocol
+// returns 0 on success, or other values if an error occures
+int downloadFileTCP(int socketFd, char* fileName, char* filePath, long fileSize, int bufferSizeInBytes);
