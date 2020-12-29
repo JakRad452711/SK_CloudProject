@@ -1,7 +1,7 @@
 /* 
 // this file was created specifically for "SK_CloudProject" project.
 // the "SK_CloudProject" is created as a collage project for a subject "Sieci Komputerowe".
-// this library contains headers for functions used in a TCPClient program.
+// this library contains headers for functions used in a TCPServer program.
 */
 
 // creates a named pipe that needs to be handeled

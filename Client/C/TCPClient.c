@@ -1,7 +1,7 @@
 /* 
 // this file was created specifically for "SK_CloudProject" project.
 // the "SK_CloudProject" is created as a collage project for a subject "Sieci Komputerowe".
-// this library contains source code responsible for client's TCP communication.
+// this file contains source code responsible for client's TCP communication.
 */
 
 #include <arpa/inet.h>
@@ -19,6 +19,7 @@
 #include "TCPClient.h"
 #include "../../Buffer.h"
 #include "../../Errors.h"
+#include "../../Orders.h"
 #include "Paths.h"
 
 int main(int argc, char** argv) {
@@ -41,11 +42,11 @@ int main(int argc, char** argv) {
 		return ERROR_BAD_ARGUMENTS;
 	}
 
-	ipAddress = argv[1];
-	portNumber = (int) strtol(argv[2], &remainingCharacters, 10);
-	remainingCharacters = NULL;
 
-	// checking if the argument is a valid port number
+	ipAddress = argv[1];
+	remainingCharacters = NULL;
+	portNumber = (int) strtol(argv[2], &remainingCharacters, 10);
+
 	if(argv[2] == remainingCharacters || portNumber < 0 || portNumber > 65535) {
 		puts("(TCP client) wrong port number was entered");
 		return ERROR_WRONG_INPUT;
@@ -64,6 +65,11 @@ int main(int argc, char** argv) {
 		puts("(TCP client) a socket error occured");
 		return ERROR_SOCKET;
 	} puts("(TCP client) socket prepared");
+	
+	if(connect(socketFd, (struct sockaddr*) &endpoint, sizeof(struct sockaddr_in) < 0)) {
+			puts("(TCP client) a connect error occured");
+			return ERROR_CONNECT;
+	}
 
 	if(handleNamedPipes(&namedPipeSend, &namedPipeReceive) != 0) {
 		puts("(TCP client) named pipes error occured");
@@ -77,11 +83,6 @@ int main(int argc, char** argv) {
 		}
 
 		char* aForm = buffer;
-
-		if(connect(socketFd, (struct sockaddr*) &endpoint, sizeof(struct sockaddr_in) < 0)) {
-			puts("(TCP client) a connect error occured");
-			return ERROR_CONNECT;
-		}
 
 		if(sendRequestFormTCP(socketFd, aForm, BUFFER_SIZE) != 0) {
 			puts("(TCP client) sending a form failed");
@@ -109,20 +110,36 @@ int main(int argc, char** argv) {
 
 		order = (int) strtol(buffer, &remainingCharacters, 10);
 
-		// checking if input is a valid number that is supported
 		if(buffer == remainingCharacters || order > 1000000) {
 			puts("(TCP client) wrong port number was entered");
 			return ERROR_WRONG_INPUT;
 		}
-		
+
 		switch(order) {
-			case 0:
+			case TCP_TERMINATE:
+				close(socketPID);
 				return 0;
-			case 1:
-				// code
+				
+			case TCP_CONTINUE:
+				continue;
+				
+			case TCP_SEND_FILE:
+				// do stuff
 				break;
-			// other cases
+				
+			case TCP_SERVER_MKDIR:
+				// do stuff
+				break;
+				
+			case TCP_CLIENT_MKDIR:
+				// do stuff
+				break;
+				
+			case TCP_DOWNLOAD_FILE:
+				// do stuff
+				break;
 		}
+		
 		break;
 	}
 

@@ -1,3 +1,9 @@
+/* 
+// this file was created specifically for "SK_CloudProject" project.
+// the "SK_CloudProject" is created as a collage project for a subject "Sieci Komputerowe".
+// this file contains defined error values.
+*/
+
 #define ERROR_WRONG_INPUT 1
 #define ERROR_BAD_ARGUMENTS 2
 #define ERROR_OPEN_FILE 3

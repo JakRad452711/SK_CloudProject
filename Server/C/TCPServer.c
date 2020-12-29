@@ -1,11 +1,13 @@
 /* 
 // this file was created specifically for "SK_CloudProject" project.
 // the "SK_CloudProject" is created as a collage project for a subject "Sieci Komputerowe".
-// this library contains headers for functions used in a TCPClient program.
+// this file contains source code responsible for client's TCP communication and logic.
 */
 
 #include "TCPServer.h"
+#include "../../Buffer.h"
 #include "../../Errors.h"
+#include "../../Orders.h"
 
 int main(int argc, char** argv) {
 	// variables
