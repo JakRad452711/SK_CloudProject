@@ -43,4 +43,4 @@ int receiveFileSizeTCP(int socketFd, long* fileSize);
 
 // downloads a file from a server through a "socketFd" using TCP protocol
 // returns 0 on success, or other values if an error occures
-int downloadFileTCP(int socketFd, char* fileName, char* filePath, long fileSize, int bufferSizeInBytes);
+int downloadFileTCP(int socketFd, char* fileName, char* saveToLocation, long fileSize, int bufferSizeInBytes);

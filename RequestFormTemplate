@@ -1,0 +1,9 @@
+LOGIN(new line)
+PASSWORD(new line)
+ACTION_TYPE(new line)
+LOCATION_PATH(new line)
+FILE_SIZE(new line) *
+FILE_NAME(NULL) *
+
+
+* if upload, or download is used. if it's not upload/download then they are empty
