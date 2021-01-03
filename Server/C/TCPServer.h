@@ -21,7 +21,11 @@ int sendFileTCP(int socketFd, char* fileName, FILE* aFile, int bufferSizeInBytes
 // receives response sent after sending of a request form using TCP protocol
 // the response is saved in the "buffer"
 // returns 0 on success, or other values if an error occures
-int receiveResquestFormTCP(int socketFd, char* buffer, int formSizeInBytes);
+int receiveRequestFormTCP(int socketFd, char* buffer, int formSizeInBytes);
+
+// receives files size and saves it to "fileSize"
+// returns 0 on success, or other values if an error occures
+int receiveFileSizeTCP(int socketFd, long* fileSize);
 
 // downloads a file from a server through a "socketFd" using TCP protocol
 // returns 0 on success, or other values if an error occures

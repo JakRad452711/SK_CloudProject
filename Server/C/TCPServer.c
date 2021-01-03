@@ -5,8 +5,12 @@
 */
 
 #include <arpa/inet.h>
+#include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -17,9 +21,10 @@
 #include "../../Values.h"
 
 int main(int argc, char** argv) {
-	int connection;
 	int action;
+	int connection;
 	int portNumber;
+	int sizeOfSockaddr_in;
 	int socketFd;
 	char buffer[BUFFER_SIZE];
 	char* remainingCharacters;
@@ -36,6 +41,7 @@ int main(int argc, char** argv) {
 
 	remainingCharacters = NULL;
 	portNumber = (int) strtol(argv[1], &remainingCharacters, 10);
+	sizeOfSockaddr_in = sizeof(struct sockaddr_in);
 
 	if(argv[1] == remainingCharacters || portNumber < 0 || portNumber > 65535) {
 		puts("(TCP server) wrong port number was entered");
@@ -55,7 +61,7 @@ int main(int argc, char** argv) {
 		return ERROR_SOCKET;
 	} puts("(TCP server) socket prepared");
 
-	if(bind(socketFd, (struct sockaddr*) &thisMachine, sizeof(struct sockaddr_in)) < 0) {
+	if(bind(socketFd, (struct sockaddr*) &thisMachine, sizeOfSockaddr_in) < 0) {
 		puts("(TCP server) bind error occured");
 		return ERROR_BIND;
 	} puts("(TCP server) after bind");
@@ -66,15 +72,20 @@ int main(int argc, char** argv) {
 	} puts("(TCP server) after listen\n");
 
 	while(1) {
-		if((connection = accept(socketFd, (struct sockaddr*) &endpoint, &size_of_sockaddr_in)) < 0) {
+		if((connection = accept(socketFd, (struct sockaddr*) &endpoint, &sizeOfSockaddr_in)) < 0) {
 			puts("(TCP server) accept error occured");
-			return ERROR_ACCEPT;
+			continue;
 		}
 		else {
-			printf("(TCP server) connection from: %s:\n", inet_ntoa(adr.sin_addr));
+			printf("(TCP server) connection from: %s:\n", inet_ntoa(thisMachine.sin_addr));
 			
 			if(fork() == 0) {
 				while(1) {
+					// variables used by some switch cases
+					char fileName[BUFFER_SIZE];
+					char sendFrom[BUFFER_SIZE];
+					char newDirectoryPath[BUFFER_SIZE];
+					
 					if(receiveRequestFormTCP(connection, buffer, BUFFER_SIZE) != 0) {
 						exit(ERROR_RECEIVE);
 					}
@@ -88,162 +99,82 @@ int main(int argc, char** argv) {
 					}
 					
 					// variables shared between some switch cases
-					char ifSucceeded[BUFFER_SIZE];
-					char* defaultDownloadLocation;
-		
-					memset(ifSucceeded, 0, BUFFER_SIZE);
-
+					char* defaultStorageLocation;
 					
-					switch(order) {
+					switch(action) {
 						case TCP_RECEIVE_FILE: {
-							char fileName[BUFFER_SIZE];
+						 // char fileName[BUFFER_SIZE]; (declaration on the beginning of internal while)
 							char saveToLocation[BUFFER_SIZE];
 						 // char* defaultStorageLocation; (declaration is right before the switch statement)
-						 // char ifSucceeded[BUFFER_SIZE] (declaration is right before the switch statement)
 							long fileSize;
 							
 							defaultStorageLocation = SERVER_DIRECTORY;
 							
-							// get a files' name from the client
-							if(recv(socketFd, buffer, BUFFER_SIZE, 0) < 0) {
-								puts("(TCP client) recv error occured");
-								a
-								continue;
-							}
-							
-							sprintf(fileName, "%s", buffer);
-							
-							// get the files' "save to" location from the client
-							if(recv(socketFd, buffer, BUFFER_SIZE, 0) < 0) {
-								puts("(TCP client) recv error occured (2)");
-								sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
-								continue;
-							}
-							
-							// TODO: CHECK IF LOCATION IS VALID (IF NOT VALID THEN FILE SIZE = 0
-							//																AND SEND EMPTY BUFFER)
-							sprintf(saveToLocation, "%s", buffer);
-							
 							// get the files' size in bytes
-							if(receiveFileSizeTCP(socketFd, &fileSize) != 0) {
-								puts("(TCP client) receive file size error occured");
-								sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
+							if(receiveFileSizeTCP(connection, &fileSize) != 0) {
+								puts("(TCP server) receive file size error occured");
 								continue;
 							}
 							
 							// download the file
 							if(receiveFileTCP(connection, fileName, strcat(defaultStorageLocation, saveToLocation), fileSize, BUFFER_SIZE) != 0) {
-								puts("(TCP client) download file error occured");
+								puts("(TCP server) download file error occured");
 							}
 							else {
-								memset(ifSucceeded, 0, BUFFER_SIZE);
-								sprintf(ifSucceeded, "%s", "SUCCESS");
-								printf("(TCP client) a file was downloaded:\n%s\n", strcat(strcat(defaultStorageLocation, saveToLocation), fileName));
+								printf("(TCP server) a file was downloaded:\n%s\n", strcat(strcat(defaultStorageLocation, saveToLocation), fileName));
 							}
-							
-							sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
+														
 						} break;
 						
-						case TCP_SERVER_MKDIR: {
-							char newDirectoryPath[BUFFER_SIZE];
-						 // char* defaultDownloadLocation; (declaration is right before the switch statement)
+						case TCP_MKDIR: {
+						 // char newDirectoryPath[BUFFER_SIZE]; (declaration on the beginning of internal while)
+						 // char* defaultStorageLocation; (declaration is right before the switch statement)
 							
 							memset(buffer, 0, BUFFER_SIZE);
 							
-							defaultDownloadLocation = CLIENT_DOWNLOAD_DIR;
+							defaultStorageLocation = SERVER_DIRECTORY;
 							
-							// get directories relative path
-							if(recv(socketFd, buffer, BUFFER_SIZE, 0) < 0) {
-								puts("(TCP client) recv error occured");
-								sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
-								continue;
-							}
-							
-							sprintf(newDirectoryPath, "%s", buffer);
-							
-							// TODO: CHECK IF THE PATH IS VALID
-							
-							// create new directory and tell the java module if it was successful
-							if(mkdir(strcat(defaultDownloadLocation, newDirectoryPath), 0777) < 0) {
-								puts("(TCP client) mkdir error occured");
+							// create new directory
+							if(mkdir(strcat(defaultStorageLocation, newDirectoryPath), 0777) < 0) {
+								puts("(TCP server) mkdir error occured");
 							}
 							else {
-								memset(ifSucceeded, 0, BUFFER_SIZE);
-								sprintf(ifSucceeded, "%s", "SUCCESS");
-								printf("(TCP client) created directory:\n%s\n", strcat(defaultDownloadLocation, newDirectoryPath));
+								printf("(TCP server) created directory:\n%s\n", strcat(defaultStorageLocation, newDirectoryPath));
 							}
-							
-							sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
-							
+														
 						}	break;
 						
 						case TCP_SEND_FILE: {
-							char uploadLocation[BUFFER_SIZE];
-							char saveToFileNamed[BUFFER_SIZE];
-						 // char ifSucceeded[BUFFER_SIZE] (declaration is right before the switch statement)
+						 // char fileName[BUFFER_SIZE]; (declaration on the beginning of internal while)
+						 // char sendFrom[BUFFER_SIZE]; (declaration on the beginning of internal while)
 							FILE* sentFile;
 							
-							memset(saveToFileNamed, 0, BUFFER_SIZE);
-							memset(uploadLocation, 0, BUFFER_SIZE);
+							memset(sendFrom, 0, BUFFER_SIZE);
 							memset(buffer, 0, BUFFER_SIZE);
 							
-							// get uploaded files name from the java module
-							if(receiveDataThroughThePipe(namedPipeReceive, buffer, BUFFER_SIZE) != 0) {
-								puts("(TCP client) receiving data through a pipe failed (3)");
-								sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
+							if((sentFile = fopen(sendFrom, "rb")) == NULL) {
+								puts("(TCP server) fopen failed");
 								continue;
 							}
 							
-							sprintf(saveToFileNamed, "%s", buffer);
-							memset(buffer, 0, BUFFER_SIZE);
-							
-							// get uploaded files saving location from the java module
-							if(receiveDataThroughThePipe(namedPipeReceive, buffer, BUFFER_SIZE) != 0) {
-								puts("(TCP client) receiving data through a pipe failed (4)");
-								sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
-								continue;
-							}
-							
-							sprintf(uploadLocation, "%s", buffer);
-							
-							if((sentFile = fopen(uploadLocation, "rb")) == NULL) {
-								puts("(TCP client) fopen failed");
-								sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
-								continue;
-							}
-							
-							// send the files size in bytes
-							if(sendFileSizeTCP(socketFd, sentFile, MAX_FILE_SIZE) != 0) {
-								puts("(TCP client) send file size failed.");
-								sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
+							// send the files' size in bytes
+							if(sendFileSizeTCP(connection, sentFile, MAX_FILE_SIZE) != 0) {
+								puts("(TCP server) send file size failed.");
 								continue;
 							}
 							
 							// send the file
-							if(uploadFileTCP(socketFd, saveToFileNamed, sentFile, BUFFER_SIZE) != 0) {
-								puts("(TCP client) send file failed.");
-								sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
+							if(sendFileTCP(connection, fileName, sentFile, BUFFER_SIZE) != 0) {
+								puts("(TCP server) send file failed.");
 								continue;
 							}
 							
 							// get response from the server
-							if(receiveResponseFormTCP(socketFd, buffer, BUFFER_SIZE) != 0) {
-								puts("(TCP client) receiving response failed (2)");
-								sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
+							if(receiveRequestFormTCP(connection, buffer, BUFFER_SIZE) != 0) {
+								puts("(TCP server) receiving response failed (2)");
 								continue;
 							}
-							
-							// pass the response to the java module
-							if(sendDataThroughThePipe(namedPipeSend, buffer, BUFFER_SIZE) != 0) {
-								puts("(TCP client) sending data through a pipe failed (2)");
-							}
-							else {
-								memset(ifSucceeded, 0, BUFFER_SIZE);
-								sprintf(ifSucceeded, "%s", "SUCCESS");
-							}
-							
-							sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
-							
+														
 						}	break;
 						
 						case TCP_CONTINUE: {
@@ -251,7 +182,7 @@ int main(int argc, char** argv) {
 						}
 						
 						case TCP_TERMINATE: {
-							close(socketFd);
+							close(connection);
 							return 0;
 						}
 					}
@@ -304,6 +235,13 @@ int receiveRequestFormTCP(int socketFd, char* buffer, int formSizeInBytes) {
 	if(recv(socketFd, buffer, formSizeInBytes, 0) < 0)
 		return ERROR_RECEIVE;
 
+	return 0;
+}
+
+int receiveFileSizeTCP(int socketFd, long* fileSize) {
+	if(recv(socketFd, fileSize, sizeof(long), 0) < 0)
+		return ERROR_RECEIVE;
+		
 	return 0;
 }
 

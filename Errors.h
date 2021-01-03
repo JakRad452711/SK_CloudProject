@@ -17,3 +17,5 @@
 #define ERROR_PIPES -11
 #define ERROR_SEND -12
 #define ERROR_RECEIVE -13
+#define ERROR_BIND -14
+#define ERROR_LISTEN -15
