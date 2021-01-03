@@ -22,9 +22,9 @@
 #include "../../Values.h"
 
 int main(int argc, char** argv) {
+	int action;
 	int namedPipeSend;
 	int namedPipeReceive;	
-	int order;
 	int portNumber;
 	int socketFd;
 	char buffer[BUFFER_SIZE];
@@ -105,29 +105,30 @@ int main(int argc, char** argv) {
 
 		memset(buffer, 0, BUFFER_SIZE);
 
-		// get an order from the java module
+		// get an action from the java module
 		if(receiveDataThroughThePipe(namedPipeReceive, buffer, sizeof(int)) != 0) {
 			puts("(TCP client) receiving data through a pipe failed (2)");
 			continue;
 		}
 
-		order = (int) strtol(buffer, &remainingCharacters, 10);
+		action = (int) strtol(buffer, &remainingCharacters, 10);
 
-		if(buffer == remainingCharacters || order < -6 || order > 0) {
+		if(buffer == remainingCharacters || action < -6 || action > 0) {
 			puts("(TCP client) wrong port number was entered");
 			return ERROR_WRONG_INPUT;
 		}
 		
 		// variables shared between some switch cases
-		char ifSucceeded[BUFFER_SIZE];
 		char* defaultDownloadLocation;
+		char fileName[BUFFER_SIZE];
+		char ifSucceeded[BUFFER_SIZE];
 		
 		memset(ifSucceeded, 0, BUFFER_SIZE);
 
-		// execute the order
-		switch(order) {
+		// execute the action
+		switch(action) {
 			case TCP_RECEIVE_FILE: {
-				char fileName[BUFFER_SIZE];
+				
 				char saveToLocation[BUFFER_SIZE];
 			 // char* defaultDownloadLocation; (declaration is right before the switch statement)
 			 // char ifSucceeded[BUFFER_SIZE] (declaration is right before the switch statement)
@@ -135,18 +136,18 @@ int main(int argc, char** argv) {
 				
 				defaultDownloadLocation = CLIENT_DOWNLOAD_DIR;
 				
-				// get a files' name from the server
-				if(recv(socketFd, buffer, BUFFER_SIZE, 0) < 0) {
-					puts("(TCP client) recv error occured (2)");
+				// get a files' name from the java module
+				if(receiveDataThroughThePipe(namedPipeReceive, buffer, BUFFER_SIZE) != 0) {
+					puts("(TCP client) receiving data through a pipe failed (3)");
 					sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
 					continue;
 				}
 				
 				sprintf(fileName, "%s", buffer);
 				
-				// get the files' location from the server
-				if(recv(socketFd, buffer, BUFFER_SIZE, 0) < 0) {
-					puts("(TCP client) recv error occured (2)");
+				// get the files' "saveTo" location from the java module
+				if(receiveDataThroughThePipe(namedPipeReceive, buffer, BUFFER_SIZE) != 0) {
+					puts("(TCP client) receiving data through a pipe failed (4)");
 					sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
 					continue;
 				}
@@ -165,7 +166,6 @@ int main(int argc, char** argv) {
 					puts("(TCP client) download file error occured");
 				}
 				else {
-					memset(ifSucceeded, 0, BUFFER_SIZE);
 					sprintf(ifSucceeded, "%s", "SUCCESS");
 					printf("(TCP client) a file was downloaded:\n%s\n", strcat(strcat(defaultDownloadLocation, saveToLocation), fileName));
 				}
@@ -173,7 +173,7 @@ int main(int argc, char** argv) {
 				sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
 			}	break;
 				
-			case TCP_CLIENT_MKDIR: {
+			case TCP_MKDIR: {
 				char newDirectoryPath[BUFFER_SIZE];
 			 // char* defaultDownloadLocation; (declaration is right before the switch statement)
 				
@@ -181,9 +181,9 @@ int main(int argc, char** argv) {
 				
 				defaultDownloadLocation = CLIENT_DOWNLOAD_DIR;
 				
-				// get directories relative path
-				if(recv(socketFd, buffer, BUFFER_SIZE, 0) < 0) {
-					puts("(TCP client) recv error occured");
+				// get directories relative path from java module
+				if(receiveDataThroughThePipe(namedPipeReceive, buffer, BUFFER_SIZE) != 0) {
+					puts("(TCP client) receiving data through a pipe failed (5)");
 					sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
 					continue;
 				}
@@ -195,7 +195,6 @@ int main(int argc, char** argv) {
 					puts("(TCP client) mkdir error occured");
 				}
 				else {
-					memset(ifSucceeded, 0, BUFFER_SIZE);
 					sprintf(ifSucceeded, "%s", "SUCCESS");
 					printf("(TCP client) created directory:\n%s\n", strcat(defaultDownloadLocation, newDirectoryPath));
 				}
@@ -205,29 +204,16 @@ int main(int argc, char** argv) {
 			}	break;
 			
 			case TCP_SEND_FILE: {
-				char saveToFileNamed[BUFFER_SIZE];
 				char uploadFrom[BUFFER_SIZE];
-				char uploadTo[BUFFER_SIZE];
 			 // char ifSucceeded[BUFFER_SIZE] (declaration is right before the switch statement)
 				FILE* sentFile;
 				
-				memset(saveToFileNamed, 0, BUFFER_SIZE);
-				memset(uploadTo, 0, BUFFER_SIZE);
+				memset(uploadFrom, 0, BUFFER_SIZE);
 				memset(buffer, 0, BUFFER_SIZE);
 				
-				// get uploaded files' name from the java module
+				// get uploaded files' "uploadFrom" location from the java module
 				if(receiveDataThroughThePipe(namedPipeReceive, buffer, BUFFER_SIZE) != 0) {
-					puts("(TCP client) receiving data through a pipe failed (3)");
-					sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
-					continue;
-				}
-				
-				sprintf(saveToFileNamed, "%s", buffer);
-				memset(buffer, 0, BUFFER_SIZE);
-				
-				// get uploaded files' "upload from" location from the java module
-				if(receiveDataThroughThePipe(namedPipeReceive, buffer, BUFFER_SIZE) != 0) {
-					puts("(TCP client) receiving data through a pipe failed (4)");
+					puts("(TCP client) receiving data through a pipe failed (6)");
 					sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
 					continue;
 				}
@@ -235,31 +221,10 @@ int main(int argc, char** argv) {
 				sprintf(uploadFrom, "%s", buffer);
 				memset(buffer, 0, BUFFER_SIZE);
 				
-				// get uploaded files' saving location from the java module
-				if(receiveDataThroughThePipe(namedPipeReceive, buffer, BUFFER_SIZE) != 0) {
-					puts("(TCP client) receiving data through a pipe failed (5)");
-					sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
-					continue;
-				}
-				
-				sprintf(uploadTo, "%s", buffer);
-				
 				if((sentFile = fopen(uploadFrom, "rb")) == NULL) {
 					puts("(TCP client) fopen failed");
 					sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
 					continue;
-				}
-				
-				// send the files' name
-				if(send(socketFd, saveToFileNamed, BUFFER_SIZE, 0) < 0 ) {
-					puts("(TCP client) send error occured");
-					sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
-				}
-				
-				// send the files' "upload to" location
-				if(send(socketFd, uploadTo, BUFFER_SIZE, 0) < 0 ) {
-					puts("(TCP client) send error occured");
-					sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
 				}
 				
 				// send the files' size in bytes
@@ -269,26 +234,12 @@ int main(int argc, char** argv) {
 					continue;
 				}
 				
-				// send the file
-				if(uploadFileTCP(socketFd, saveToFileNamed, sentFile, BUFFER_SIZE) != 0) {
+				// upload the file
+				if(uploadFileTCP(socketFd, fileName, sentFile, BUFFER_SIZE) != 0) {
 					puts("(TCP client) send file failed.");
-					sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
 					continue;
-				}
-				
-				// get response from the server
-				if(receiveResponseFormTCP(socketFd, buffer, BUFFER_SIZE) != 0) {
-					puts("(TCP client) receiving response failed (2)");
-					sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
-					continue;
-				}
-				
-				// pass the response to the java module
-				if(sendDataThroughThePipe(namedPipeSend, buffer, BUFFER_SIZE) != 0) {
-					puts("(TCP client) sending data through a pipe failed (2)");
 				}
 				else {
-					memset(ifSucceeded, 0, BUFFER_SIZE);
 					sprintf(ifSucceeded, "%s", "SUCCESS");
 				}
 				
