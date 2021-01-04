@@ -16,10 +16,10 @@
 #include <unistd.h>
 
 #include "TCPClient.h"
-#include "../../Actions.h"
-#include "../../Errors.h"
-#include "../../Paths.h"
-#include "../../Values.h"
+#include "../../Shared/Actions.h"
+#include "../../Shared/Errors.h"
+#include "../../Shared/Paths.h"
+#include "../../Shared/Values.h"
 
 int main(int argc, char** argv) {
 	int action;
