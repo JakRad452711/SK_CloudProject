@@ -1,0 +1,41 @@
+README
+this file has steps that are taken by certain actions.
+only essencial steps and ones that regard communication are listed
+
+* = "(BUFFER_SIZE file terminated with NULL)"
+
+TCP_RECEIVE_FILE (client):
+1. get files' name from java module *
+2. get files' "saveTo" location from java module *
+3. get files' size in bytes from server
+4. download a file from server
+5. send success response to java module *
+note: path is created from default download path + saveToLocation
+
+TCP_SEND_FILE (server):
+1. send files' size in bytes
+2. send file
+note: files' path and name used to open sent file come from received request forms
+
+TCP_MKDIR (client):
+1. get directories relative path from java module *
+2. create a new directory
+3. send success response to java module *
+note: new directory is created from default download path + newDirectoryPath
+
+TCP_SEND_FILE (client):
+1. get uploaded files' "upload from" location from the java module *
+2. send the files' size in bytes
+3. upload the file
+4. send success response to java module *
+
+TCP_RECEIVE_FILE (server):
+1. get files' size in bytes
+2. download the file
+note: download location and file name come from received request forms
+
+TCP_MKDIR (server):
+1. create a new directory
+note: directories location comes from received request forms
+
+TCP_CONTINUE and TCP_EXIT don't communicate anywhere and so they are not listed here
