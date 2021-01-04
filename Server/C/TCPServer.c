@@ -81,25 +81,68 @@ int main(int argc, char** argv) {
 			
 			if(fork() == 0) {
 				while(1) {
+					// variables used to check if user can perform an action
+					int numberOfRequestFormFields;
+					char actionType[BUFFER_SIZE];
+					char login[BUFFER_SIZE];
+					char password[BUFFER_SIZE];
+					char* requestForm;
+					char* requestFormField;
 					// variables used by some switch cases
 					char fileName[BUFFER_SIZE];
 					char sendFrom[BUFFER_SIZE];
 					char newDirectoryPath[BUFFER_SIZE];
+					// auxiliary variables
+					char fileSizeChar[BUFFER_SIZE];
+					
+					numberOfRequestFormFields = 0;
 					
 					if(receiveRequestFormTCP(connection, buffer, BUFFER_SIZE) != 0) {
-						exit(ERROR_RECEIVE);
+						continue;
 					}
 					
-					// handle request form
+					requestForm = strtok(requestForm, "\n");
+					requestFormField = requestForm;
+					
+					char requestFormFieldContent[6][BUFFER_SIZE];
+					
+					while(requestFormField != NULL && numberOfRequestFormFields < 6) {
+						requestFormField = strtok(NULL, "\n");
+						sprintf(requestFormFieldContent[numberOfRequestFormFields++], "%s", requestFormField);
+					}
+					
+					if(numberOfRequestFormFields < 6) {
+						puts("(TCP server) invalid request form was passed");
+						sprintf(buffer, "DENIED\nThe request form consists of wrong number of fields (ERROR)");
+						sendResponseFormTCP(connection, buffer, BUFFER_SIZE);
+						continue;
+					}
+					
+					login = requestFormFieldContent[0];
+					password = requestFormFieldContent[1];
+					actionType = requestFormFieldContent[2];
+					newDirectoryPath = requestFormFieldContent[3];
+					sendFrom = requestFormFieldContent[3];
+					fileSizeChar = requestFormFieldContent[4];
+					fileName = requestFormFieldContent[5];
+					
+					remainingCharacters = NULL;
+					fileSize = (int) strtol(fileSizeChar, &remainingCharacters, 10);
+
+					if(fileSizeChar == remainingCharacters || fileSize > MAX_FILE_SIZE) {
+						puts("(TCP server) wrong file size number was entered");
+						continue;
+					}
+					
 					// check if user can perform an action
 					// create response
 					
 					if(sendResponseFormTCP(connection, buffer, BUFFER_SIZE) != 0) {
-						exit(ERROR_SEND);
+						continue;
 					}
 					
 					// variables shared between some switch cases
-					char* defaultStorageLocation;
+					char* defaultStorageLocation;exit
 					
 					switch(action) {
 						case TCP_RECEIVE_FILE: {
@@ -241,6 +284,10 @@ int receiveRequestFormTCP(int socketFd, char* buffer, int formSizeInBytes) {
 int receiveFileSizeTCP(int socketFd, long* fileSize) {
 	if(recv(socketFd, fileSize, sizeof(long), 0) < 0)
 		return ERROR_RECEIVE;
+		
+	if(*fileSize > MAX_FILE_SIZE) {
+		return ERROR_FILE_SIZE;
+	}
 		
 	return 0;
 }

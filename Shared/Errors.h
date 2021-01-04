@@ -19,3 +19,4 @@
 #define ERROR_RECEIVE -13
 #define ERROR_BIND -14
 #define ERROR_LISTEN -15
+#define ERROR_REQUEST_FORM -16
