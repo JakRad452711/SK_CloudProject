@@ -1,0 +1,6 @@
+
+login(SPACE)password(SPACE)permissions(new line)
+
+permissions (r - restricted (download), n - non-restricted (download, upload))
+
+note: user logins and password can only consist of big and small english letters and digits 0-9
