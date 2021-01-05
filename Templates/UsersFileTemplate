@@ -3,7 +3,7 @@ will be stored. each line in the user file will contain user login, password and
 permissions. there can be multiple lines all in the same format shown below.
 
 
-login(SPACE)password(SPACE)permissions(new line)
+login(SPACE)password(SPACE)permissions(SPACE)(new line)
 
 
 notes:
