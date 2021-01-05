@@ -92,6 +92,7 @@ int main(int argc, char** argv) {
 					char fileName[BUFFER_SIZE];
 					char sendFrom[BUFFER_SIZE];
 					char newDirectoryPath[BUFFER_SIZE];
+					long fileSize;
 					// auxiliary variables
 					char fileSizeChar[BUFFER_SIZE];
 					
@@ -118,13 +119,13 @@ int main(int argc, char** argv) {
 						continue;
 					}
 					
-					login = requestFormFieldContent[0];
-					password = requestFormFieldContent[1];
-					actionType = requestFormFieldContent[2];
-					newDirectoryPath = requestFormFieldContent[3];
-					sendFrom = requestFormFieldContent[3];
-					fileSizeChar = requestFormFieldContent[4];
-					fileName = requestFormFieldContent[5];
+					sprintf(login, "%s", requestFormFieldContent[0]);
+					sprintf(password, "%s", requestFormFieldContent[1]);
+					sprintf(actionType, "%s", requestFormFieldContent[2]);
+					sprintf(newDirectoryPath, "%s", requestFormFieldContent[3]);
+					sprintf(sendFrom, "%s", requestFormFieldContent[3]);
+					sprintf(fileSizeChar, "%s", requestFormFieldContent[4]);
+					sprintf(fileName, "%s", requestFormFieldContent[5]);
 					
 					remainingCharacters = NULL;
 					fileSize = (int) strtol(fileSizeChar, &remainingCharacters, 10);
@@ -142,14 +143,13 @@ int main(int argc, char** argv) {
 					}
 					
 					// variables shared between some switch cases
-					char* defaultStorageLocation;exit
+					char* defaultStorageLocation;
 					
 					switch(action) {
 						case TCP_RECEIVE_FILE: {
-						 // char fileName[BUFFER_SIZE]; (declaration on the beginning of internal while)
+							// char fileName[BUFFER_SIZE]; (declaration on the beginning of internal while)
 							char saveToLocation[BUFFER_SIZE];
-						 // char* defaultStorageLocation; (declaration is right before the switch statement)
-							long fileSize;
+							// char* defaultStorageLocation; (declaration is right before the switch statement)
 							
 							defaultStorageLocation = SERVER_DIRECTORY;
 							
@@ -188,8 +188,8 @@ int main(int argc, char** argv) {
 						}	break;
 						
 						case TCP_SEND_FILE: {
-						 // char fileName[BUFFER_SIZE]; (declaration on the beginning of internal while)
-						 // char sendFrom[BUFFER_SIZE]; (declaration on the beginning of internal while)
+							// char fileName[BUFFER_SIZE]; (declaration on the beginning of internal while)
+							// char sendFrom[BUFFER_SIZE]; (declaration on the beginning of internal while)
 							FILE* sentFile;
 							
 							memset(sendFrom, 0, BUFFER_SIZE);
