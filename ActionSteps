@@ -1,6 +1,8 @@
 README
-this file has steps that are taken by certain actions.
-only essencial steps and ones that regard communication are listed
+this file is supposed to visualize steps taken by TCP client and TCP server applications
+in order to complete certain actions. Only steps that regard communication between
+C client, C server and C client Java client or are supposed to help visualize how programs
+work are listed.
 
 * = "(BUFFER_SIZE size file terminated with NULL)"
 

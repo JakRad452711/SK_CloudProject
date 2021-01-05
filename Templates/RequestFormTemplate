@@ -1,3 +1,7 @@
+this file contains template of request form contents sent by a C server to a C client
+and later passed to java client. sent form is an array of chars of size BUFFER_SIZE
+in a format specified below.
+
 LOGIN(new line)
 PASSWORD(new line)
 ACTION_TYPE(new line)
@@ -6,4 +10,4 @@ FILE_SIZE(new line) *
 FILE_NAME(NULL) *
 
 
-* if upload, or download is used. if it's not upload/download then they are empty
+* if upload, or download is used. if it's not upload/download then they are empty (special characters remain)

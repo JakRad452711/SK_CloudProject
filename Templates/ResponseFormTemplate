@@ -1,2 +1,6 @@
+this file contains template of response form contents sent by a C server to a C client
+and later passed to java client. sent form is an array of chars of size BUFFER_SIZE
+in a format specified below.
+
 ACCEPTED or DENIED(new line)
 RESPONSE_MESSAGE(NULL)

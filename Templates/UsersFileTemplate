@@ -1,6 +1,11 @@
+this file contains a template of contents of a file in which users logins and passwords
+will be stored. each line in the user file will contain user login, password and the users 
+permissions. there can be multiple lines all in the same format shown below.
+
 
 login(SPACE)password(SPACE)permissions(new line)
 
-permissions (r - restricted (download), n - non-restricted (download, upload))
 
-note: user logins and password can only consist of big and small english letters and digits 0-9
+notes:
+available permissions (r - restricted (download), n - non-restricted (download, upload))
+user logins and password can only consist of big and small english letters and digits 0-9
