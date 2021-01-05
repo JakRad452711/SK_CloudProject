@@ -2,7 +2,15 @@ README
 this file has steps that are taken by certain actions.
 only essencial steps and ones that regard communication are listed
 
-* = "(BUFFER_SIZE file terminated with NULL)"
+* = "(BUFFER_SIZE size file terminated with NULL)"
+
+shared steps:
+1. wait for request form from java module *
+2. pass request form to server *
+3. get response from the server *
+4. pass response to java module *
+5. take action and execute (int value of sizeof(int)) [available action values are presented in Shared/Actions.h]
+6. send success response *
 
 TCP_RECEIVE_FILE (client):
 1. get files' name from java module *
