@@ -86,15 +86,20 @@ int main(int argc, char** argv) {
 					char actionType[BUFFER_SIZE];
 					char login[BUFFER_SIZE];
 					char password[BUFFER_SIZE];
-					char* requestForm;
+					char* requestFormStrtok;
 					char* requestFormField;
+					char* userCredentialsFileLine;
+					FILE* userCredentialsFile;
 					// variables used by some switch cases
 					char fileName[BUFFER_SIZE];
 					char sendFrom[BUFFER_SIZE];
 					char newDirectoryPath[BUFFER_SIZE];
 					long fileSize;
 					// auxiliary variables
+					int canTheActionBePerformed;
+					int canUserPerformTheAction;
 					char fileSizeChar[BUFFER_SIZE];
+					size_t userFileLineSize;
 					
 					numberOfRequestFormFields = 0;
 					
@@ -102,8 +107,8 @@ int main(int argc, char** argv) {
 						continue;
 					}
 					
-					requestForm = strtok(requestForm, "\n");
-					requestFormField = requestForm;
+					requestFormStrtok = strtok(requestFormStrtok, "\n");
+					requestFormField = requestFormStrtok;
 					
 					char requestFormFieldContent[6][BUFFER_SIZE];
 					
@@ -130,15 +135,58 @@ int main(int argc, char** argv) {
 					remainingCharacters = NULL;
 					fileSize = (int) strtol(fileSizeChar, &remainingCharacters, 10);
 
-					if(fileSizeChar == remainingCharacters || fileSize > MAX_FILE_SIZE) {
+					if((fileSizeChar == remainingCharacters && actionType == "UPLOAD") || fileSize > MAX_FILE_SIZE) {
 						puts("(TCP server) wrong file size number was entered");
+						sprintf(buffer, "DENIED\nThe upload request form has wrong file size");
+						sendResponseFormTCP(connection, buffer, BUFFER_SIZE);
 						continue;
 					}
 					
-					// check if user can perform an action
+					if((userCredentialsFile = fopen(USER_CREDENTIALS_FILE, "r")) == NULL) {
+						puts("(TCP server) fopen failed");
+						sprintf(buffer, "DENIED\nSomething went wrong on the server end");
+						sendResponseFormTCP(connection, buffer, BUFFER_SIZE);
+						continue;
+					}
+					
+					canUserPerformTheAction = 0;
+					userCredentialsFileLine = NULL;
+					userFileLineSize = 0;
+					
+					while(getline(&userCredentialsFileLine, &userFileLineSize, userCredentialsFile) >= 0) {
+						char* userFileLineField;
+						
+						userFileLineField = strtok(userCredentialsFileLine, " ");
+						
+						if(!strcmp(login, userFileLineField)) 
+							continue;
+							
+						userFileLineField = strtok(NULL, " ");
+							
+						if(!strcmp(password, userFileLineField))
+							continue;
+							
+						userFileLineField = strtok(NULL, " ");
+						
+						if(actionType == "DOWNLOAD")
+							canUserPerformTheAction = 1;
+							
+						if((actionType == "UPLOAD" || actionType == "MKDIR") && userCredentialsFileLine == "n")
+							canUserPerformTheAction = 1;
+							
+						free(userFileLineField);
+					}
+					
+					fclose(userCredentialsFile);
+					
+					canTheActionBePerformed = 0;
+					
+					// check if an action can be performed
 					// create response
 					
 					if(sendResponseFormTCP(connection, buffer, BUFFER_SIZE) != 0) {
+						sprintf(buffer, "DENIED\nSomething went wrong on the server end");
+						sendResponseFormTCP(connection, buffer, BUFFER_SIZE);
 						continue;
 					}
 					
@@ -196,7 +244,7 @@ int main(int argc, char** argv) {
 							memset(buffer, 0, BUFFER_SIZE);
 							
 							if((sentFile = fopen(sendFrom, "rb")) == NULL) {
-								puts("(TCP server) fopen failed");
+								puts("(TCP server) fopen failed (2)");
 								continue;
 							}
 							
