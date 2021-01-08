@@ -96,10 +96,10 @@ int main(int argc, char** argv) {
 					char saveToLocation[BUFFER_SIZE];
 					char newDirectoryPath[BUFFER_SIZE];
 					long fileSize;
+					FILE* fileWithFileNames;
 					// auxiliary variables
 					int canTheActionBePerformed;
 					int canUserPerformTheAction;
-					char fileSizeChar[BUFFER_SIZE];
 					size_t userFileLineSize;
 					
 					numberOfRequestFormFields = 0;
@@ -111,14 +111,14 @@ int main(int argc, char** argv) {
 					requestFormStrtok = strtok(requestFormStrtok, "\n");
 					requestFormField = requestFormStrtok;
 					
-					char requestFormFieldContent[6][BUFFER_SIZE];
+					char requestFormFieldContent[5][BUFFER_SIZE];
 					
-					while(requestFormField != NULL && numberOfRequestFormFields < 6) {
+					while(requestFormField != NULL && numberOfRequestFormFields < 4) {
 						requestFormField = strtok(NULL, "\n");
 						sprintf(requestFormFieldContent[numberOfRequestFormFields++], "%s", requestFormField);
 					}
 					
-					if(numberOfRequestFormFields < 6) {
+					if(numberOfRequestFormFields < 4) {
 						puts("(TCP server) invalid request form was passed");
 						sprintf(buffer, "DENIED\nThe request form consists of wrong number of fields (ERROR)");
 						sendResponseFormTCP(connection, buffer, BUFFER_SIZE);
@@ -131,18 +131,7 @@ int main(int argc, char** argv) {
 					sprintf(newDirectoryPath, "%s", requestFormFieldContent[3]);
 					sprintf(sendFrom, "%s", requestFormFieldContent[3]);
 					sprintf(saveToLocation, "%s", requestFormFieldContent[3]);
-					sprintf(fileSizeChar, "%s", requestFormFieldContent[4]);
-					sprintf(fileName, "%s", requestFormFieldContent[5]);
-					
-					remainingCharacters = NULL;
-					fileSize = (int) strtol(fileSizeChar, &remainingCharacters, 10);
-
-					if((fileSizeChar == remainingCharacters && strcmp(actionType, "UPLOAD")) || fileSize > MAX_FILE_SIZE) {
-						puts("(TCP server) wrong file size number was entered");
-						sprintf(buffer, "DENIED\nThe upload request form has wrong file size");
-						sendResponseFormTCP(connection, buffer, BUFFER_SIZE);
-						continue;
-					}
+					sprintf(fileName, "%s", requestFormFieldContent[4]);
 					
 					if((userCredentialsFile = fopen(USER_CREDENTIALS_FILE, "r")) == NULL) {
 						puts("(TCP server) fopen failed");
@@ -252,6 +241,7 @@ int main(int argc, char** argv) {
 							// char fileName[BUFFER_SIZE]; (declaration on the beginning of internal while)
 							char saveToLocation[BUFFER_SIZE];
 							// char* defaultStorageLocation; (declaration is right before the switch statement)
+							// FILE* fileWithFileNames; (declaration on the beginning of internal while)
 														
 							// get the files' size in bytes
 							if(receiveFileSizeTCP(connection, &fileSize) != 0) {
@@ -267,8 +257,6 @@ int main(int argc, char** argv) {
 								printf("(TCP server) a file was downloaded:\n%s\n", strcat(strcat(defaultStorageLocation, saveToLocation), fileName));
 								
 								// if suceeded create new path in the file containing available files
-								FILE* fileWithFileNames;
-								
 								if((fileWithFileNames = fopen(strcat(defaultStorageLocation, FILE_NAMES), "a")) == NULL) {
 									puts("(TCP server) fopen failed (2)");
 									continue;
