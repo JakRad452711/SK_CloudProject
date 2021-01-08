@@ -235,7 +235,7 @@ int main(int argc, char** argv) {
 				}
 				
 				// upload the file
-				if(uploadFileTCP(socketFd, fileName, sentFile, BUFFER_SIZE) != 0) {
+				if(uploadFileTCP(socketFd, sentFile, BUFFER_SIZE) != 0) {
 					puts("(TCP client) send file failed.");
 					continue;
 				}
@@ -249,11 +249,6 @@ int main(int argc, char** argv) {
 
 			case TCP_CONTINUE: {
 				continue;
-			}
-			
-			case TCP_TERMINATE: {
-				close(socketFd);
-				return 0;
 			}
 		}
 		
@@ -305,7 +300,7 @@ int sendFileSizeTCP(int socketFd, FILE* aFile, long maxSizeInBytes) {
 	return 0;
 }
 
-int uploadFileTCP(int socketFd, char* fileName, FILE* aFile, int bufferSizeInBytes) {
+int uploadFileTCP(int socketFd, FILE* aFile, int bufferSizeInBytes) {
 	fseek(aFile, 0, SEEK_END);
 	long fileSize = ftell(aFile);
 	fseek(aFile, 0, SEEK_SET);

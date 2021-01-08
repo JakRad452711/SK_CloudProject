@@ -4,8 +4,7 @@
 // this file contains order values and corresponding to them actions;
 */
 
-#define TCP_RECEIVE_FILE 500
-#define TCP_MKDIR 400
-#define TCP_SEND_FILE 300
-#define TCP_CONTINUE 200
-#define TCP_TERMINATE 100
+#define TCP_RECEIVE_FILE 400
+#define TCP_MKDIR 300
+#define TCP_SEND_FILE 200
+#define TCP_CONTINUE 100

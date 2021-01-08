@@ -30,7 +30,7 @@ int sendFileSizeTCP(int socketFd, FILE* aFile, long maxSizeInBytes);
 // uploads "aFile" through a "socketFd" using TCP protocol
 // the function sends multiple packets of "bufferSizeInBytes" size
 // returns 0 on success, or other values if an error occurres
-int uploadFileTCP(int socketFd, char* fileName, FILE* aFile, int bufferSizeInBytes);
+int uploadFileTCP(int socketFd, FILE* aFile, int bufferSizeInBytes);
 
 // receives response sent after sending of a request form using TCP protocol
 // the response is saved in the "buffer"
