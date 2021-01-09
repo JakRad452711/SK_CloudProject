@@ -80,6 +80,17 @@ public class GUI implements ActionListener , ListSelectionListener {
 	private static String toSendStringAction;
 	private static byte sentAction[];
 	private static char[] toSendCharAction;
+	private static String toSendStringDownPath;
+	private static byte sentDownPath[];
+	private static char[] toSendCharDownPath;
+	private static String toSendStringDownName;
+	private static byte sentDownName[];
+	private static char[] toSendCharDownName;
+	private static String toSendStringUpPathName;
+	private static byte sentUpPathName[];
+	private static char[] toSendCharUpPathName;
+	
+	
 	
 	
 	public static void frameSetUp () 
@@ -403,6 +414,30 @@ public class GUI implements ActionListener , ListSelectionListener {
 						sentAction[i] = (byte) toSendCharAction[i];
 						
 					writerPipe.write(sentAction);
+					////////////////////////////////////////////////////////////
+					toSendStringDownName =fileNameToGive;
+					
+					toSendCharDownName = toSendStringDownName.toCharArray();
+					sentDownName = new byte[4096];
+					
+					for(int i=0 ; i<toSendCharDownName.length ; i++)
+						sentDownName[i] = (byte) toSendCharDownName[i];
+					
+					
+					
+					writerPipe.write(sent);
+					///////////////////////////////////
+					toSendStringDownPath = "/";
+					
+					toSendCharDownPath = toSendStringDownPath.toCharArray();
+					sentDownPath = new byte[4096];
+					
+					for(int i=0 ; i<toSendCharDownPath.length ; i++)
+						sentDownPath[i] = (byte) toSendCharDownPath[i];
+					
+					
+					
+					writerPipe.write(sentDownPath);
 						
 				}
 				else
@@ -460,6 +495,17 @@ public class GUI implements ActionListener , ListSelectionListener {
 						sentAction[i] = (byte) toSendCharAction[i];
 						
 					writerPipe.write(sentAction);
+					
+					///////////////////
+					toSendStringUpPathName = "/"+uploadTextField.getText();
+					
+					toSendCharUpPathName = toSendStringUpPathName.toCharArray();
+					sentUpPathName = new byte[4096];
+					
+					for(int i=0 ; i<toSendCharUpPathName.length ; i++)
+						sentUpPathName[i] = (byte) toSendCharUpPathName[i];
+					
+					writerPipe.write(sentUpPathName);
 						
 				}
 				else
@@ -482,14 +528,21 @@ public class GUI implements ActionListener , ListSelectionListener {
 			}
 			else if (e.getSource()== closeButton)
 			{
-				p.destroy(); 
+				try
+				{
+					p.destroy(); 
+				}
+				catch (Exception e2)
+				{
+						
+				}
 				System.exit(0);
 				  
 			}
 			else if (e.getSource()== connectButton)
 			{
 
-				toSendString = "Guest\n123\nREQUEST_FILE_NAMES\nEMPTY\nEMPTY";
+				toSendString = "Guest\n123\nREQUEST_FILE_NAMES\nEMPTY\n.files";
 				
 				toSendChar = toSendString.toCharArray();
 				sent = new byte[4096];
