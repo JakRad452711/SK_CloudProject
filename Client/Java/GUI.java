@@ -113,7 +113,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 		guestButton.addActionListener (new GUI());
 		panel.add(guestButton);
 		closeButton = new JButton("Exit");
-		closeButton.addActionListener(new CloseListener());
+		closeButton.addActionListener(new GUI());
 		closeButton.setBounds(300,300, 130,25);
 		panel.add(closeButton);
 		
