@@ -162,7 +162,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 		panelSuccess.add(filesText);
 		
 		
-		File myObj = new File("nazwy_plikpw.txt");
+		File myObj = new File(".files");
 	  
 		try {
 			myFileReader = new Scanner(myObj);
