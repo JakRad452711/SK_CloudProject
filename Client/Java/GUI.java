@@ -425,7 +425,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 					
 					
 					
-					writerPipe.write(sent);
+					writerPipe.write(sentDownName);
 					///////////////////////////////////
 					toSendStringDownPath = "/";
 					
@@ -542,7 +542,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 			else if (e.getSource()== connectButton)
 			{
 
-				toSendString = "Guest\n123\nREQUEST_FILE_NAMES\nEMPTY\n.files";
+				toSendString = "Guest\n123\nDOWNLOAD\n/\n.files";
 				
 				toSendChar = toSendString.toCharArray();
 				sent = new byte[4096];
@@ -569,7 +569,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 					e1.printStackTrace();
 				 }
 				 
-				toSendStringAction = "100";
+				toSendStringAction = "300";
 					
 				toSendCharAction = toSendStringAction.toCharArray();
 				sentAction = new byte[4];
@@ -579,8 +579,32 @@ public class GUI implements ActionListener , ListSelectionListener {
 					
 				writerPipe.write(sentAction);
 					
+				////////////////////
+				toSendStringDownName =".files";
+				
+				toSendCharDownName = toSendStringDownName.toCharArray();
+				sentDownName = new byte[4096];
+				
+				for(int i=0 ; i<toSendCharDownName.length ; i++)
+					sentDownName[i] = (byte) toSendCharDownName[i];
+				
+				
+				
+				writerPipe.write(sentDownName);
+				///////////////////////////////////
+				toSendStringDownPath = "/";
+				
+				toSendCharDownPath = toSendStringDownPath.toCharArray();
+				sentDownPath = new byte[4096];
+				
+				for(int i=0 ; i<toSendCharDownPath.length ; i++)
+					sentDownPath[i] = (byte) toSendCharDownPath[i];
+				
+				
+				
+				writerPipe.write(sentDownPath);
 				 
-				 
+				
 				 //jesli będzie potrzebny komunikat związany z nie przyjęciem do portu
 				 
 					/*
