@@ -472,6 +472,11 @@ public class GUI implements ActionListener , ListSelectionListener {
 					e1.printStackTrace();
 				 }
 				 
+				 bytesIntCommand = ByteBuffer.allocate(4).putInt(100).array();
+					
+					writerPipe.write(bytesIntCommand);
+				 
+				 
 				 //jesli będzie potrzebny komunikat związany z nie przyjęciem do portu
 				 
 					/*
