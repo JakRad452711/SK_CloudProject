@@ -70,7 +70,8 @@ public class GUI implements ActionListener , ListSelectionListener {
 	private static String[] responseAnswerSplit;
 	private static String userNameSendString;
 	private static  byte [] bytesIntCommand ;
-	
+	private static JTextField ipField;
+	private static JTextField portField;
 	public static void frameSetUp () 
 	{
 		
@@ -112,10 +113,22 @@ public class GUI implements ActionListener , ListSelectionListener {
 		guestButton.setBounds(180,80,130,25);
 		guestButton.addActionListener (new GUI());
 		panel.add(guestButton);
+		
+		
 		closeButton = new JButton("Exit");
 		closeButton.addActionListener(new GUI());
 		closeButton.setBounds(300,300, 130,25);
 		panel.add(closeButton);
+		
+		
+		ipField = new JTextField("Ip serwera");
+		ipField.setBounds(200,300,50,100);
+		panel.add(ipField);
+		
+		portField = new JTextField("Port serwera");	
+		portField.setBounds(200,500,50,100);
+		panel.add(portField);
+		
 		
 		frame.setVisible(true);
 		
@@ -217,8 +230,8 @@ public class GUI implements ActionListener , ListSelectionListener {
 	public static void main(String[] args) throws IOException {
 		///STWORENIE PLIKÓW DO FIFO
 		
-		readerPipe = new PipeClass("/usr/lib/CloudProjectNamedPipeCToJava");
-		writerPipe = new PipeClass("/usr/lib/CloudProjectNamedPipeJavaToC");
+		readerPipe = new PipeClass(".CloudProjectNamedPipeCToJava");
+		writerPipe = new PipeClass(".CloudProjectNamedPipeJavaToC");
 		
 		
 		//stworzenie charów z formularza
@@ -238,10 +251,11 @@ public class GUI implements ActionListener , ListSelectionListener {
 		
 		
 		
-	
+		String ipText = ipField.getText();
+		String portText = portField.getText();
 		
 		//obudzenie procesu C klient
-		 p  = Runtime.getRuntime().exec("gnome-terminal --tab -- ./TCPClient.h") ;
+		 p  = Runtime.getRuntime().exec("gnome-terminal --tab -- ./TCPClient.h " + ipText + " " + portText) ;
 		
 		
 		 	frameSetUp();
