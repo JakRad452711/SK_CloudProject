@@ -121,17 +121,13 @@ int main(int argc, char** argv) {
 		// variables shared between some switch cases
 		char* defaultDownloadLocation;
 		char fileName[BUFFER_SIZE];
-		char ifSucceeded[BUFFER_SIZE];
 		
-		memset(ifSucceeded, 0, BUFFER_SIZE);
-
 		// execute the action
 		switch(action) {
 			case TCP_RECEIVE_FILE: {
 				
 				char saveToLocation[BUFFER_SIZE];
 			 // char* defaultDownloadLocation; (declaration is right before the switch statement)
-			 // char ifSucceeded[BUFFER_SIZE] (declaration is right before the switch statement)
 				long fileSize;
 				
 				defaultDownloadLocation = CLIENT_DOWNLOAD_DIR;
@@ -139,7 +135,6 @@ int main(int argc, char** argv) {
 				// get a files' name from the java module
 				if(receiveDataThroughThePipe(namedPipeReceive, buffer, BUFFER_SIZE) != 0) {
 					puts("(TCP client) receiving data through a pipe failed (3)");
-					sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
 					continue;
 				}
 				
@@ -148,7 +143,6 @@ int main(int argc, char** argv) {
 				// get the files' "saveTo" location from the java module
 				if(receiveDataThroughThePipe(namedPipeReceive, buffer, BUFFER_SIZE) != 0) {
 					puts("(TCP client) receiving data through a pipe failed (4)");
-					sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
 					continue;
 				}
 				
@@ -157,7 +151,6 @@ int main(int argc, char** argv) {
 				// get the files' size in bytes
 				if(receiveFileSizeTCP(socketFd, &fileSize) != 0) {
 					puts("(TCP client) receive file size error occured");
-					sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
 					continue;
 				}
 				
@@ -166,11 +159,9 @@ int main(int argc, char** argv) {
 					puts("(TCP client) download file error occured");
 				}
 				else {
-					sprintf(ifSucceeded, "%s", "SUCCESS");
 					printf("(TCP client) a file was downloaded:\n%s\n", strcat(strcat(defaultDownloadLocation, saveToLocation), fileName));
 				}
 				
-				sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
 			}	break;
 				
 			case TCP_MKDIR: {
@@ -184,7 +175,6 @@ int main(int argc, char** argv) {
 				// get directories relative path from java module
 				if(receiveDataThroughThePipe(namedPipeReceive, buffer, BUFFER_SIZE) != 0) {
 					puts("(TCP client) receiving data through a pipe failed (5)");
-					sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
 					continue;
 				}
 				
@@ -195,17 +185,13 @@ int main(int argc, char** argv) {
 					puts("(TCP client) mkdir error occured");
 				}
 				else {
-					sprintf(ifSucceeded, "%s", "SUCCESS");
 					printf("(TCP client) created directory:\n%s\n", strcat(defaultDownloadLocation, newDirectoryPath));
 				}
-				
-				sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
-				
+								
 			}	break;
 			
 			case TCP_SEND_FILE: {
 				char uploadFrom[BUFFER_SIZE];
-			 // char ifSucceeded[BUFFER_SIZE] (declaration is right before the switch statement)
 				FILE* sentFile;
 				
 				memset(uploadFrom, 0, BUFFER_SIZE);
@@ -214,7 +200,6 @@ int main(int argc, char** argv) {
 				// get uploaded files' "uploadFrom" location from the java module
 				if(receiveDataThroughThePipe(namedPipeReceive, buffer, BUFFER_SIZE) != 0) {
 					puts("(TCP client) receiving data through a pipe failed (6)");
-					sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
 					continue;
 				}
 				
@@ -223,14 +208,12 @@ int main(int argc, char** argv) {
 				
 				if((sentFile = fopen(uploadFrom, "rb")) == NULL) {
 					puts("(TCP client) fopen failed");
-					sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
 					continue;
 				}
 				
 				// send the files' size in bytes
 				if(sendFileSizeTCP(socketFd, sentFile, MAX_FILE_SIZE) != 0) {
 					puts("(TCP client) send file size failed.");
-					sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
 					continue;
 				}
 				
@@ -239,11 +222,6 @@ int main(int argc, char** argv) {
 					puts("(TCP client) send file failed.");
 					continue;
 				}
-				else {
-					sprintf(ifSucceeded, "%s", "SUCCESS");
-				}
-				
-				sendDataThroughThePipe(namedPipeSend, ifSucceeded, sizeof(char));
 				
 			}	break;
 
