@@ -464,7 +464,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 				//obudzenie procesu C klient
 				 try 
 				 {
-					p  = Runtime.getRuntime().exec("gnome-terminal --tab -- ./TCPClient.h " + ipText + " " + portText) ;
+					p  = Runtime.getRuntime().exec("gnome-terminal --tab -- ./Client " + ipText + " " + portText) ;
 				 }
 				 catch (IOException e1) 
 				 {
