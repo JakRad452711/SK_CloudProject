@@ -77,8 +77,9 @@ public class GUI implements ActionListener , ListSelectionListener {
 	private static JLabel ipLabel;
 	private static JLabel portLabel;
 	private static JButton connectButton;
-	
-	
+	private static String toSendStringAction;
+	private static byte sentAction[];
+	private static char[] toSendCharAction;
 	
 	
 	public static void frameSetUp () 
@@ -336,7 +337,18 @@ public class GUI implements ActionListener , ListSelectionListener {
 				{
 					JOptionPane.showMessageDialog(null,part2,"Błąd logowania",JOptionPane.INFORMATION_MESSAGE);
 				}
-						
+					
+					
+				toSendStringAction = "100";
+				
+				toSendCharAction = toSendStringAction.toCharArray();
+				sentAction = new byte[4];
+					
+				for(int i=0 ; i<toSendCharAction.length ; i++)
+					sentAction[i] = (byte) toSendCharAction[i];
+					
+				writerPipe.write(sentAction);
+				
 					
 			}
 			
@@ -382,15 +394,31 @@ public class GUI implements ActionListener , ListSelectionListener {
 				part2 = responseAnswerSplit[1];
 				if( part1.equals("ACCEPTED")) 
 				{
-					bytesIntCommand = ByteBuffer.allocate(4).putInt(300).array();
+					toSendStringAction = "300";
 					
-					writerPipe.write(bytesIntCommand);
+					toSendCharAction = toSendStringAction.toCharArray();
+					sentAction = new byte[4];
+						
+					for(int i=0 ; i<toSendCharAction.length ; i++)
+						sentAction[i] = (byte) toSendCharAction[i];
+						
+					writerPipe.write(sentAction);
+						
 				}
 				else
 				{
-					bytesIntCommand = ByteBuffer.allocate(4).putInt(100).array(); 
+					toSendStringAction = "100";
+					
+					toSendCharAction = toSendStringAction.toCharArray();
+					sentAction = new byte[4];
+						
+					for(int i=0 ; i<toSendCharAction.length ; i++)
+						sentAction[i] = (byte) toSendCharAction[i];
+						
+					writerPipe.write(sentAction);
+						
 
-					writerPipe.write(bytesIntCommand);
+				
 					JOptionPane.showMessageDialog(null,part2,"Błąd pobierania",JOptionPane.INFORMATION_MESSAGE);
 				}
 					
@@ -423,15 +451,31 @@ public class GUI implements ActionListener , ListSelectionListener {
 				
 				if(part1.equals("ACCEPTED"))
 				{
-					bytesIntCommand = ByteBuffer.allocate(4).putInt(200).array();
+					toSendStringAction = "200";
 					
-					writerPipe.write(bytesIntCommand);
+					toSendCharAction = toSendStringAction.toCharArray();
+					sentAction = new byte[4];
+						
+					for(int i=0 ; i<toSendCharAction.length ; i++)
+						sentAction[i] = (byte) toSendCharAction[i];
+						
+					writerPipe.write(sentAction);
+						
 				}
 				else
 				{
-					bytesIntCommand = ByteBuffer.allocate(4).putInt(100).array();
+					toSendStringAction = "100";
 					
-					writerPipe.write(bytesIntCommand);
+					toSendCharAction = toSendStringAction.toCharArray();
+					sentAction = new byte[4];
+						
+					for(int i=0 ; i<toSendCharAction.length ; i++)
+						sentAction[i] = (byte) toSendCharAction[i];
+						
+					writerPipe.write(sentAction);
+						
+					
+				
 					JOptionPane.showMessageDialog(null,part2,"Błąd dodania",JOptionPane.INFORMATION_MESSAGE);
 				}
 				
@@ -472,9 +516,16 @@ public class GUI implements ActionListener , ListSelectionListener {
 					e1.printStackTrace();
 				 }
 				 
-				 bytesIntCommand = ByteBuffer.allocate(4).putInt(100).array();
+				toSendStringAction = "100";
 					
-					writerPipe.write(bytesIntCommand);
+				toSendCharAction = toSendStringAction.toCharArray();
+				sentAction = new byte[4];
+					
+				for(int i=0 ; i<toSendCharAction.length ; i++)
+					sentAction[i] = (byte) toSendCharAction[i];
+					
+				writerPipe.write(sentAction);
+					
 				 
 				 
 				 //jesli będzie potrzebny komunikat związany z nie przyjęciem do portu
