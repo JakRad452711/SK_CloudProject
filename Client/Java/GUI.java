@@ -12,11 +12,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Scanner;
 import java.util.Set;
-
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -52,13 +52,9 @@ public class GUI implements ActionListener , ListSelectionListener {
 	private static JButton uploadButton;
 	private static JTextField uploadTextField;
 	private static String fileNameToGive;
-	private static FileOutputStream javaOutput;
-	private static FileInputStream javaInput;
 	private static  Process p ;
 	private static JPasswordField passwordText;
-	private static CharArrayWriter writer ;
 	private static   Scanner myFileReader;
-	private static CharArrayReader reader;
 	private static  String files[];
 	private static String passw;
 	private static String toSendString;
@@ -69,11 +65,11 @@ public class GUI implements ActionListener , ListSelectionListener {
 	private static PipeClass readerPipe;
 	private static PipeClass writerPipe;
 	private static String responseAnswer;
-	private static String denialMessage;
 	private static String part1;
 	private static String part2;
 	private static String[] responseAnswerSplit;
 	private static String userNameSendString;
+	private static  byte [] bytesIntCommand ;
 	
 	public static void frameSetUp () 
 	{
@@ -214,12 +210,8 @@ public class GUI implements ActionListener , ListSelectionListener {
 	}
 	
 
-	
-	
-	
-	
-	
-	
+		
+		
 	
 	
 	public static void main(String[] args) throws IOException {
@@ -231,7 +223,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 		
 		//stworzenie charów z formularza
 		
-		CharArrayWriter writer = new CharArrayWriter();
+		
 		
 		toSendString = "Guest\n123\nREQUEST_FILE_NAMES\n\n";
 		
@@ -294,7 +286,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 				welcomeUserText = userText.getText();
 				userNameSendString = welcomeUserText;
 				passw = passwordText.getText();
-				CharArrayWriter writer = new CharArrayWriter();
+			
 				
 				toSendString = userNameSendString+ "\n" + passw +"\nLOG_IN\n\n";
 				
@@ -355,7 +347,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 				passw = passwordText.getText();
 
 
-				CharArrayWriter writer = new CharArrayWriter();
+		
 				
 				toSendString = userNameSendString+ "\n" + passw +"\nDOWNLOAD\n/\n"+fileNameToGive;
 				
@@ -365,9 +357,28 @@ public class GUI implements ActionListener , ListSelectionListener {
 				for(int i=0 ; i<toSendChar.length ; i++)
 					sent[i] = (byte) toSendChar[i];
 				
+				
+				
 				writerPipe.write(sent);
-				
-				
+
+				responseAnswer = response.toString();
+				responseAnswerSplit = responseAnswer.split("\n");
+				part1 = responseAnswerSplit[0];
+				part2 = responseAnswerSplit[1];
+				if( part1.equals("ACCEPTED")) 
+				{
+					bytesIntCommand = ByteBuffer.allocate(4).putInt(300).array();
+					
+					writerPipe.write(bytesIntCommand);
+				}
+				else
+				{
+					bytesIntCommand = ByteBuffer.allocate(4).putInt(100).array(); 
+
+					writerPipe.write(bytesIntCommand);
+					JOptionPane.showMessageDialog(null,part2,"Błąd pobierania",JOptionPane.INFORMATION_MESSAGE);
+				}
+					
 				
 			
 			}
@@ -376,7 +387,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 				//tutaj stuff do przekazania fifo (fifo write)
 				
 				passw = passwordText.getText();
-				CharArrayWriter writer = new CharArrayWriter();
+				
 				
 				toSendString = userNameSendString+ "\n" + passw +"\nDOWNLOAD\n/\n"+uploadTextField.getText();
 				
@@ -388,12 +399,33 @@ public class GUI implements ActionListener , ListSelectionListener {
 				
 				writerPipe.write(sent);
 				
+				responseAnswer = response.toString();
+				responseAnswerSplit = responseAnswer.split("\n");
+				part1 = responseAnswerSplit[0];
+				part2 = responseAnswerSplit[1];
+				
+				
+				
+				if(part1.equals("ACCEPTED"))
+				{
+					bytesIntCommand = ByteBuffer.allocate(4).putInt(200).array();
+					
+					writerPipe.write(bytesIntCommand);
+				}
+				else
+				{
+					bytesIntCommand = ByteBuffer.allocate(4).putInt(100).array();
+					
+					writerPipe.write(bytesIntCommand);
+					JOptionPane.showMessageDialog(null,part2,"Błąd dodania",JOptionPane.INFORMATION_MESSAGE);
+				}
 				
 			}
 			else if (e.getSource()== closeButton)
 			{
-				 System.exit(0);
-				  p.destroy();
+				p.destroy(); 
+				System.exit(0);
+				  
 			}
 			
 			
