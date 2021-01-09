@@ -94,7 +94,6 @@ int main(int argc, char** argv) {
 					char fileName[BUFFER_SIZE];
 					char sendFrom[BUFFER_SIZE];
 					char saveToLocation[BUFFER_SIZE];
-					char newDirectoryPath[BUFFER_SIZE];
 					long fileSize;
 					FILE* fileWithFileNames;
 					// auxiliary variables
@@ -128,7 +127,6 @@ int main(int argc, char** argv) {
 					sprintf(login, "%s", requestFormFieldContent[0]);
 					sprintf(password, "%s", requestFormFieldContent[1]);
 					sprintf(actionType, "%s", requestFormFieldContent[2]);
-					sprintf(newDirectoryPath, "%s", requestFormFieldContent[3]);
 					sprintf(sendFrom, "%s", requestFormFieldContent[3]);
 					sprintf(saveToLocation, "%s", requestFormFieldContent[3]);
 					sprintf(fileName, "%s", requestFormFieldContent[4]);
@@ -270,26 +268,6 @@ int main(int argc, char** argv) {
 							}
 														
 						} break;
-						
-						/*
-						case TCP_MKDIR: {
-						 // char newDirectoryPath[BUFFER_SIZE]; (declaration on the beginning of internal while)
-						 // char* defaultStorageLocation; (declaration is right before the switch statement)
-							
-							memset(buffer, 0, BUFFER_SIZE);
-							
-							defaultStorageLocation = SERVER_DIRECTORY;
-							
-							// create new directory
-							if(mkdir(strcat(defaultStorageLocation, newDirectoryPath), 0777) < 0) {
-								puts("(TCP server) mkdir error occured");
-							}
-							else {
-								printf("(TCP server) created directory:\n%s\n", strcat(defaultStorageLocation, newDirectoryPath));
-							}
-														
-						}	break;
-						*/
 						
 						case TCP_SEND_FILE: {
 							// char fileName[BUFFER_SIZE]; (declaration on the beginning of internal while)

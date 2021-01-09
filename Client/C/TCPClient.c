@@ -163,32 +163,6 @@ int main(int argc, char** argv) {
 				}
 				
 			}	break;
-				
-			case TCP_MKDIR: {
-				char newDirectoryPath[BUFFER_SIZE];
-			 // char* defaultDownloadLocation; (declaration is right before the switch statement)
-				
-				memset(buffer, 0, BUFFER_SIZE);
-				
-				defaultDownloadLocation = CLIENT_DOWNLOAD_DIR;
-				
-				// get directories relative path from java module
-				if(receiveDataThroughThePipe(namedPipeReceive, buffer, BUFFER_SIZE) != 0) {
-					puts("(TCP client) receiving data through a pipe failed (5)");
-					continue;
-				}
-				
-				sprintf(newDirectoryPath, "%s", buffer);
-				
-				// create new directory and tell the java module if it was successful
-				if(mkdir(strcat(defaultDownloadLocation, newDirectoryPath), 0777) < 0) {
-					puts("(TCP client) mkdir error occured");
-				}
-				else {
-					printf("(TCP client) created directory:\n%s\n", strcat(defaultDownloadLocation, newDirectoryPath));
-				}
-								
-			}	break;
 			
 			case TCP_SEND_FILE: {
 				char uploadFrom[BUFFER_SIZE];
@@ -229,8 +203,6 @@ int main(int argc, char** argv) {
 				continue;
 			}
 		}
-		
-		break; // <- - - this break is only for testing purposes. once everything works properly it will be removed
 	}
 }
 
