@@ -72,6 +72,15 @@ public class GUI implements ActionListener , ListSelectionListener {
 	private static  byte [] bytesIntCommand ;
 	private static JTextField ipField;
 	private static JTextField portField;
+	private static String ipText;
+	private static String portText;
+	private static JLabel ipLabel;
+	private static JLabel portLabel;
+	private static JButton connectButton;
+	
+	
+	
+	
 	public static void frameSetUp () 
 	{
 		
@@ -120,15 +129,26 @@ public class GUI implements ActionListener , ListSelectionListener {
 		closeButton.setBounds(300,300, 130,25);
 		panel.add(closeButton);
 		
+		ipLabel = new JLabel("Ip serwera");
+		ipLabel.setBounds(10,170,80,25);
+		panel.add(ipLabel);
 		
-		ipField = new JTextField("Ip serwera");
-		ipField.setBounds(200,300,50,100);
+		ipField = new JTextField(30);
+		ipField.setBounds(100,170,165,25);
 		panel.add(ipField);
 		
-		portField = new JTextField("Port serwera");	
-		portField.setBounds(200,500,50,100);
+		portLabel = new JLabel ("Port serwera");
+		portLabel.setBounds(10,200,80,25);
+		panel.add(portLabel);
+		
+		portField = new JTextField(30);	
+		portField.setBounds(100,200,165,25);
 		panel.add(portField);
 		
+		connectButton = new JButton("Połącz z serwerem");
+		connectButton.setBounds(100,230,150,25);
+		connectButton.addActionListener(new GUI());
+		panel.add(connectButton);
 		
 		frame.setVisible(true);
 		
@@ -229,38 +249,19 @@ public class GUI implements ActionListener , ListSelectionListener {
 	
 	public static void main(String[] args) throws IOException {
 		///STWORENIE PLIKÓW DO FIFO
+
+	 
 		
 		readerPipe = new PipeClass(".CloudProjectNamedPipeCToJava");
 		writerPipe = new PipeClass(".CloudProjectNamedPipeJavaToC");
 		
-		
+		frameSetUp();
+		firstPanel();
 		//stworzenie charów z formularza
 		
 		
 		
-		toSendString = "Guest\n123\nREQUEST_FILE_NAMES\n\n";
 		
-		toSendChar = toSendString.toCharArray();
-		sent = new byte[4096];
-		
-		for(int i=0 ; i<toSendChar.length ; i++)
-			sent[i] = (byte) toSendChar[i];
-		
-		writerPipe.write(sent);
-		
-		
-		
-		
-		String ipText = ipField.getText();
-		String portText = portField.getText();
-		
-		//obudzenie procesu C klient
-		 p  = Runtime.getRuntime().exec("gnome-terminal --tab -- ./TCPClient.h " + ipText + " " + portText) ;
-		
-		
-		 	frameSetUp();
-			firstPanel();
-			
 			
 		
 			
@@ -302,7 +303,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 				passw = passwordText.getText();
 			
 				
-				toSendString = userNameSendString+ "\n" + passw +"\nLOG_IN\n\n";
+				toSendString = userNameSendString+ "\n" + passw +"\nLOG_IN\nEMPTY\nEMPTY";
 				
 				toSendChar = toSendString.toCharArray();
 				sent = new byte[4096];
@@ -441,7 +442,58 @@ public class GUI implements ActionListener , ListSelectionListener {
 				System.exit(0);
 				  
 			}
-			
+			else if (e.getSource()== connectButton)
+			{
+
+				toSendString = "Guest\n123\nREQUEST_FILE_NAMES\nEMPTY\nEMPTY";
+				
+				toSendChar = toSendString.toCharArray();
+				sent = new byte[4096];
+				
+				for(int i=0 ; i<toSendChar.length ; i++)
+					sent[i] = (byte) toSendChar[i];
+				
+				writerPipe.write(sent);
+				
+				
+				 ipText = ipField.getText();
+				 portText = portField.getText();
+				
+				
+
+				//obudzenie procesu C klient
+				 try 
+				 {
+					p  = Runtime.getRuntime().exec("gnome-terminal --tab -- ./TCPClient.h " + ipText + " " + portText) ;
+				 }
+				 catch (IOException e1) 
+				 {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				 }
+				 
+				 //jesli będzie potrzebny komunikat związany z nie przyjęciem do portu
+				 
+					/*
+					 * responseAnswer = response.toString(); responseAnswerSplit =
+					 * responseAnswer.split("\n"); part1 = responseAnswerSplit[0]; part2 =
+					 * responseAnswerSplit[1];
+					 * 
+					 * 
+					 * 
+					 * if(part1.equals("ACCEPTED")) { bytesIntCommand =
+					 * ByteBuffer.allocate(4).putInt(200).array();
+					 * 
+					 * writerPipe.write(bytesIntCommand); } else { bytesIntCommand =
+					 * ByteBuffer.allocate(4).putInt(100).array();
+					 * 
+					 * writerPipe.write(bytesIntCommand);
+					 * JOptionPane.showMessageDialog(null,part2,"Błąd dodania",JOptionPane.
+					 * INFORMATION_MESSAGE); }
+					 */
+				 
+				
+			}
 			
 			
 			
