@@ -13,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Scanner;
@@ -332,9 +333,11 @@ public class GUI implements ActionListener , ListSelectionListener {
 					response[i] = (char) received[i];
 				
 				
-				responseAnswer = response.toString();
+				responseAnswer = new String(received, Charset.defaultCharset());
+				
 				responseAnswerSplit = responseAnswer.split("\n");
 				part1 = responseAnswerSplit[0];
+				
 				
 				if(part1.equals("ACCEPTED"))
 				{
@@ -409,9 +412,11 @@ public class GUI implements ActionListener , ListSelectionListener {
 					response[i] = (char) received[i];
 				
 				
-				responseAnswer = response.toString();
+				responseAnswer = new String(received, Charset.defaultCharset());
+				
 				responseAnswerSplit = responseAnswer.split("\n");
 				part1 = responseAnswerSplit[0];
+				
 			
 				if( part1.equals("ACCEPTED")) 
 				{
@@ -493,11 +498,11 @@ public class GUI implements ActionListener , ListSelectionListener {
 				
 				for(int i=0 ; i<received.length ; i++)
 					response[i] = (char) received[i];
+				responseAnswer = new String(received, Charset.defaultCharset());
 				
-				responseAnswer = response.toString();
 				responseAnswerSplit = responseAnswer.split("\n");
 				part1 = responseAnswerSplit[0];
-	
+				
 				
 				
 				
@@ -608,7 +613,9 @@ public class GUI implements ActionListener , ListSelectionListener {
 				for(int i=0 ; i<received.length ; i++)
 					response[i] = (char) received[i];
 				
-				responseAnswer = response.toString();
+				
+				responseAnswer = new String(received, Charset.defaultCharset());
+			
 				responseAnswerSplit = responseAnswer.split("\n");
 				part1 = responseAnswerSplit[0];
 				
