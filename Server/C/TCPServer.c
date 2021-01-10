@@ -81,6 +81,8 @@ int main(int argc, char** argv) {
 				puts("(TCP client) child process greets");
 				
 				while(1) {
+					puts("(TCP server) on while start");
+					
 					// variables used to check if user can perform an action
 					int numberOfRequestFormFields;
 					char actionType[BUFFER_SIZE];
@@ -288,7 +290,7 @@ int main(int argc, char** argv) {
 								
 								filePath = connectStrings(saveToLocation, fileName, "\n");
 								
-								fwrite(fileWithFileNames, 1, strlen(filePath), filePath);
+								fputs(filePath, fileWithFileNames);
 									
 								free(filePath);
 								fclose(fileWithFileNames);
