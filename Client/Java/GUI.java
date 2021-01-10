@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -263,7 +265,11 @@ public class GUI implements ActionListener , ListSelectionListener {
 	public static void main(String[] args) throws IOException {
 		///STWORENIE PLIKÓW DO FIFO
 
-	 
+		File toClose = null;
+        toClose = new File(".CloudProjectNamedPipeCToJava");
+        toClose.delete();
+        toClose = new File(".CloudProjectNamedPipeJavaToC");
+        toClose.delete();
 		
 		readerPipe = new PipeClass(".CloudProjectNamedPipeCToJava");
 		writerPipe = new PipeClass(".CloudProjectNamedPipeJavaToC");
@@ -290,13 +296,11 @@ public class GUI implements ActionListener , ListSelectionListener {
 	public void valueChanged(ListSelectionEvent e) 
     { 
         //set the text of the label to the selected value of lists 
-        downloadTextLabel.setText("Nazwa pliku " + list.getSelectedValue()); 
+        downloadTextLabel.setText("" + list.getSelectedValue()); 
          
        fileNameToGive = downloadTextLabel.getText();
         //if     fileToDownload.endsWith("/");
           // wyswietlam zawartosc katalogu	
-        System.out.print(fileToDownload);
-        fileNameToGive = fileToDownload;
         
     } 
 	
@@ -326,11 +330,12 @@ public class GUI implements ActionListener , ListSelectionListener {
 				
 				writerPipe.write(sent);
 				received = readerPipe.read();
+				System.out.println((char) received[0]);
 				responseAnswer = new String (received);
 				
 				
 				responseAnswerSplit = responseAnswer.substring(0, 8);
-				
+				System.out.println(responseAnswer);
 				if(responseAnswerSplit.equals("ACCEPTED"))
 				{
 					frame.getContentPane().removeAll();
@@ -378,11 +383,6 @@ public class GUI implements ActionListener , ListSelectionListener {
 			 //tutaj wrzucamy stuff do przekazania fifo	 (fifo read)
 				
 				
-				
-				passw = passwordText.getText();
-
-
-		
 				
 				toSendString = userNameSendString+ "\n" + passw +"\nDOWNLOAD\n/\n"+fileNameToGive;
 				
@@ -464,7 +464,6 @@ public class GUI implements ActionListener , ListSelectionListener {
 			{
 				//tutaj stuff do przekazania fifo (fifo write)
 				
-				passw = passwordText.getText();
 				String test = uploadTextField.getText();
 				
 				toSendString = userNameSendString+ "\n" + passw +"\nUPLOAD\n/\n"+ test;
@@ -591,8 +590,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 					
 				received = readerPipe.read();
 				response = new char[4096];
-		
-				
+					
 				
 				responseAnswer = new String (received);
 				

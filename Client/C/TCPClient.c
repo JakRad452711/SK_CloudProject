@@ -137,6 +137,8 @@ int main(int argc, char** argv) {
 				
 				defaultDownloadLocation = CLIENT_DOWNLOAD_DIR;
 				
+				memset(buffer, 0, BUFFER_SIZE); 
+				
 				// get a files' name from the java module
 				if(receiveDataThroughThePipe(namedPipeReceive, buffer, BUFFER_SIZE) != 0) {
 					puts("(TCP client) receiving data through a pipe failed (3)");
@@ -216,7 +218,6 @@ int main(int argc, char** argv) {
 				continue;
 			}
 		}
-		memset(buffer, 0, BUFFER_SIZE); 
 	}
 }
 
