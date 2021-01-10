@@ -6,7 +6,7 @@
 
 #define CLIENT_DOWNLOAD_DIR "./CloudProjectDownloaded"
 #define SERVER_DIRECTORY "./CloudProjectDirectory"
-#define USER_CREDENTIALS_FILE "./CloudProjectDirectory/.Users"
-#define FILE_NAMES ".Files"
-#define C_TO_JAVA_NAMED_PIPE "/usr/lib/CloudProjectNamedPipeCToJava"
-#define JAVA_TO_C_NAMED_PIPE "/usr/lib/CloudProjectNamedPipeJavaToC"
+#define USER_CREDENTIALS_FILE "./CloudProjectDirectory/.users"
+#define FILE_NAMES ".files"
+#define C_TO_JAVA_NAMED_PIPE "./.CloudProjectNamedPipeCToJava"
+#define JAVA_TO_C_NAMED_PIPE "./.CloudProjectNamedPipeJavaToC"

@@ -31,8 +31,6 @@ int main(int argc, char** argv) {
 	struct sockaddr_in endpoint;
 	struct sockaddr_in thisMachine;
 
-	puts("TCP server program started");
-
 	if(argc < 2) {
 		puts("(TCP server) too few arguments were entered");
 		puts("(TCP server) please enter a port number as an argument");
@@ -80,6 +78,8 @@ int main(int argc, char** argv) {
 			printf("(TCP server) connection from: %s:\n", inet_ntoa(thisMachine.sin_addr));
 			
 			if(fork() == 0) {
+				puts("(TCP client) child process greets");
+				
 				while(1) {
 					// variables used to check if user can perform an action
 					int numberOfRequestFormFields;
@@ -88,6 +88,7 @@ int main(int argc, char** argv) {
 					char password[BUFFER_SIZE];
 					char* requestFormStrtok;
 					char* requestFormField;
+					char* userFileLineField;
 					char* userCredentialsFileLine;
 					FILE* userCredentialsFile;
 					// variables used by some switch cases
@@ -99,30 +100,29 @@ int main(int argc, char** argv) {
 					// auxiliary variables
 					int canTheActionBePerformed;
 					int canUserPerformTheAction;
+					char* filePath;
 					size_t userFileLineSize;
 					
 					numberOfRequestFormFields = 0;
 					
 					if(receiveRequestFormTCP(connection, buffer, BUFFER_SIZE) != 0) {
 						continue;
-					}
+					} printf("(TCP server) received from a client:\n%s\n", buffer);
 					
-					requestFormStrtok = strtok(requestFormStrtok, "\n");
-					requestFormField = requestFormStrtok;
+					requestFormStrtok = buffer;
 					
 					char requestFormFieldContent[5][BUFFER_SIZE];
 					
-					while(requestFormField != NULL && numberOfRequestFormFields < 4) {
-						requestFormField = strtok(NULL, "\n");
+					while(numberOfRequestFormFields < 5 && (requestFormField = strtok_r(requestFormStrtok, "\n", &requestFormStrtok))) {
 						sprintf(requestFormFieldContent[numberOfRequestFormFields++], "%s", requestFormField);
 					}
 					
-					if(numberOfRequestFormFields < 4) {
+					if(numberOfRequestFormFields < 5) {
 						puts("(TCP server) invalid request form was passed");
 						sprintf(buffer, "DENIED\nThe request form consists of wrong number of fields (ERROR)");
 						sendResponseFormTCP(connection, buffer, BUFFER_SIZE);
 						continue;
-					}
+					} puts("(TCP server) after checking request form number of fields");
 					
 					sprintf(login, "%s", requestFormFieldContent[0]);
 					sprintf(password, "%s", requestFormFieldContent[1]);
@@ -136,7 +136,7 @@ int main(int argc, char** argv) {
 						sprintf(buffer, "DENIED\nSomething went wrong on the server end");
 						sendResponseFormTCP(connection, buffer, BUFFER_SIZE);
 						continue;
-					}
+					} puts("(TCP server) opened user credentials file");
 					
 					canUserPerformTheAction = 0;
 					userCredentialsFileLine = NULL;
@@ -144,85 +144,99 @@ int main(int argc, char** argv) {
 					
 					// go through file containing users' credentials
 					while(getline(&userCredentialsFileLine, &userFileLineSize, userCredentialsFile) >= 0) {
-						char* userFileLineField;
 						
 						userFileLineField = strtok(userCredentialsFileLine, " ");
 						
 						// check if the line contains the login specified in request form if not check next line
-						if(!strcmp(login, userFileLineField)) 
+						if(!(strcmp(login, userFileLineField) == 0)) 
 							continue;
-							
+						
 						userFileLineField = strtok(NULL, " ");
 							
 						// check if the users' passwords match if not go to the next line
-						if(!strcmp(password, userFileLineField))
+						if(!(strcmp(password, userFileLineField) == 0))
 							continue;
-							
+						
 						userFileLineField = strtok(NULL, " ");
 						
-						
-						if(strcmp(actionType, "LOG_IN") || strcmp(actionType, "REQUEST_FILE_NAMES") || strcmp(actionType, "DOWNLOAD"))
-							canUserPerformTheAction = 1;
+						if(
+							strcmp(actionType, "LOG_IN") == 0 || 
+							strcmp(actionType, "DOWNLOAD") == 0
+						)	canUserPerformTheAction = 1;
 							
-						if((strcmp(actionType, "UPLOAD") || strcmp(actionType, "MKDIR")) && strcmp(userCredentialsFileLine, "n"))
-							canUserPerformTheAction = 1;
-							
-						free(userFileLineField);
-					}
+						if(
+							(
+								strcmp(actionType, "UPLOAD") == 0 || 
+								strcmp(actionType, "MKDIR") == 0
+							) && 
+							strcmp(userFileLineField, "n") == 0
+						)	canUserPerformTheAction = 1;
+					} puts("(TCP server) after checking user's credentials");
 					
+					free(userCredentialsFileLine);
 					fclose(userCredentialsFile);
 					
 					canTheActionBePerformed = 0;
 					
-					if(canUserPerformTheAction && strcmp(actionType, "LOG_IN")) {
+					if(!canUserPerformTheAction) {
+						puts("(TCP server) can't perform an action");
+						sprintf(buffer, "DENIED\nUser can't perform the action");
+					}
+
+					if(canUserPerformTheAction && strcmp(actionType, "LOG_IN") == 0) {
+						puts("(TCP server) LOG_IN");
 						canTheActionBePerformed = 1;
 						action = TCP_CONTINUE;
 					}
-					
-					if(canUserPerformTheAction && strcmp(actionType, "REQUEST_FILE_NAMES")) {
-						canTheActionBePerformed = 1;
-						action = TCP_SEND_FILE;
-						
-						memset(sendFrom, 0, BUFFER_SIZE);
-						memset(fileName, 0, BUFFER_SIZE);
-						
-						sprintf(sendFrom, "/");
-						sprintf(fileName, FILE_NAMES);
-					}
-					
+
+					filePath = connectStrings(SERVER_DIRECTORY, sendFrom, fileName);
+
 					if(
 						canUserPerformTheAction && 
-						strcmp(actionType, "DOWNLOAD") && 
+						strcmp(actionType, "DOWNLOAD") == 0 && 
 						!strstr(sendFrom, ".") && 
 						!strstr(sendFrom, "~") && 
 						!strstr(fileName, "/") && 
-						!(fopen(strcat(SERVER_DIRECTORY, strcat(sendFrom, fileName)), "rb") == NULL)
+						!(fopen(filePath, "r") == NULL)
 					) {
+						puts("(TCP server) DOWNLOAD");
 						canTheActionBePerformed = 1;
 						action = TCP_SEND_FILE;
 					}
-					else {
-						printf("(TCP server) file couldn't be opened:\n%s\n", strcat(sendFrom, fileName));
-						sprintf(buffer, "DENIED\nFile: '%s' couldn't be opened", strcat(sendFrom, fileName));
-					}
+					else if(strcmp(actionType, "DOWNLOAD") == 0) {
+						free(filePath);
+						filePath = connectStrings(sendFrom, fileName, "");
+						printf("(TCP server) file couldn't be opened:\n%s\n", filePath);
+						sprintf(buffer, "DENIED\nFile: '%s' couldn't be opened", filePath);
+					} free(filePath);
 					
 					if(
 						canUserPerformTheAction &&
-						strcmp(actionType, "UPLOAD") && 
+						strcmp(actionType, "UPLOAD") == 0 && 
 						!strstr(saveToLocation, ".") && 
 						!strstr(saveToLocation, "~") &&
 						!strstr(fileName, "/")
 					) {
+						puts("(TCP server) UPLOAD");
 						canTheActionBePerformed = 1;
 						action = TCP_RECEIVE_FILE;
 					}
-					else {
-						printf("(TCP server) invalid data was received:\n%s\n", strcat(saveToLocation, fileName));
+					else if(strcmp(actionType, "UPLOAD") == 0) {
+						filePath = connectStrings(saveToLocation, fileName, "");
+						printf("(TCP server) invalid data was received:\n%s\n", filePath);
 						sprintf(buffer, "DENIED\nFiles path can't contain '.', '~'\nFiles name can't contain '/'");
+						free(filePath);
 					}
 					
 					if(canUserPerformTheAction && canTheActionBePerformed) {
-						sprintf(buffer, "ACCEPTED\nUser login and password were correct");
+						if(strcmp(actionType, "LOG_IN") == 0)
+							sprintf(buffer, "ACCEPTED\nUser login and password were correct");
+						
+						if(strcmp(actionType, "DOWNLOAD") == 0)
+							sprintf(buffer, "ACCEPTED\nFile can be downloaded");
+						
+						if(strcmp(actionType, "UPLOAD") == 0)
+							sprintf(buffer, "ACCEPTED\nFile can be uploaded");
 					}
 					
 					if(sendResponseFormTCP(connection, buffer, BUFFER_SIZE) != 0) {
@@ -236,9 +250,12 @@ int main(int argc, char** argv) {
 					
 					switch(action) {
 						case TCP_RECEIVE_FILE: {
+							puts("(TCP server) TCP_RECEIVE_FILE");
+							
 							// char fileName[BUFFER_SIZE]; (declaration on the beginning of internal while)
 							char saveToLocation[BUFFER_SIZE];
 							// char* defaultStorageLocation; (declaration is right before the switch statement)
+							// char* filePath; (declaration on the beginning of internal while)
 							// FILE* fileWithFileNames; (declaration on the beginning of internal while)
 														
 							// get the files' size in bytes
@@ -247,39 +264,53 @@ int main(int argc, char** argv) {
 								continue;
 							}
 							
+							filePath = connectStrings(defaultStorageLocation, saveToLocation, "");
+							
 							// download the file
-							if(receiveFileTCP(connection, fileName, strcat(defaultStorageLocation, saveToLocation), fileSize, BUFFER_SIZE) != 0) {
+							if(receiveFileTCP(connection, fileName, filePath, fileSize, BUFFER_SIZE) != 0) {
 								puts("(TCP server) download file error occured");
+								free(filePath);
 							}
 							else {
-								printf("(TCP server) a file was downloaded:\n%s\n", strcat(strcat(defaultStorageLocation, saveToLocation), fileName));
+								free(filePath);
+								filePath = connectStrings(defaultStorageLocation, saveToLocation, fileName);
+
+								printf("(TCP server) a file was downloaded:\n%s\n", filePath);
+								
+								free(filePath);
+								filePath = connectStrings(defaultStorageLocation, FILE_NAMES, "");
 								
 								// if suceeded create new path in the file containing available files
-								if((fileWithFileNames = fopen(strcat(defaultStorageLocation, FILE_NAMES), "a")) == NULL) {
+								if((fileWithFileNames = fopen(filePath, "a")) == NULL) {
 									puts("(TCP server) fopen failed (2)");
 									continue;
-								}
+								} free(filePath);
 								
-								char* filePath = strcat(saveToLocation, fileName);
+								filePath = connectStrings(saveToLocation, fileName, "\n");
 								
-								fwrite(filePath, 1, strlen(filePath), fileWithFileNames);
+								fwrite(fileWithFileNames, 1, strlen(filePath), filePath);
 									
+								free(filePath);
 								fclose(fileWithFileNames);
 							}
 														
 						} break;
 						
 						case TCP_SEND_FILE: {
+							puts("(TCP server) TCP_SEND_FILE");
+							
 							// char fileName[BUFFER_SIZE]; (declaration on the beginning of internal while)
 							// char sendFrom[BUFFER_SIZE]; (declaration on the beginning of internal while)
 							FILE* sentFile;
 							
 							memset(buffer, 0, BUFFER_SIZE);
 							
-							if((sentFile = fopen(strcat(defaultStorageLocation, strcat(sendFrom, fileName)), "rb")) == NULL) {
+							filePath = connectStrings(defaultStorageLocation, sendFrom, fileName);
+							
+							if((sentFile = fopen(filePath, "r")) == NULL) {
 								puts("(TCP server) fopen failed (3)");
 								continue;
-							}
+							} free(filePath);
 							
 							// send the files' size in bytes
 							if(sendFileSizeTCP(connection, sentFile, MAX_FILE_SIZE) != 0) {
@@ -302,6 +333,8 @@ int main(int argc, char** argv) {
 						}	break;
 						
 						case TCP_CONTINUE: {
+							puts("(TCP server) TCP_CONTINUE");
+							
 							continue;
 						}
 					}
@@ -311,6 +344,16 @@ int main(int argc, char** argv) {
 	}
 
 	return 0;
+}
+
+char* connectStrings(char* str1, char* str2, char* str3) {
+	int sizeOfAllStrings = sizeof(str1) + sizeof(str2) + sizeof(str3);
+	char* returnString;
+	
+	returnString = malloc(sizeOfAllStrings + 1);
+	sprintf(returnString, "%s%s%s", str1, str2, str3);
+	
+	return returnString;
 }
 
 int sendResponseFormTCP(int socketFd, char* aForm, int formSizeInBytes) {
@@ -372,11 +415,16 @@ int receiveFileTCP(int socketFd, char* fileName, char* saveToLocation, long file
 	int numberOfPackages;
 	int received;
 	char buffer[bufferSizeInBytes];
+	char* filePath;
 	FILE* newFile;
 	
 	numberOfPackages = ceil((double) fileSize / (double) bufferSizeInBytes);
-	if((newFile = fopen(strcat(saveToLocation, fileName), "wb")) == NULL)
+	filePath = connectStrings(saveToLocation, fileName, "");
+	
+	if((newFile = fopen(filePath, "w")) == NULL)
 		return ERROR_OPEN_FILE;
+	
+	free(filePath);
 	
 	for(int i=0 ; i<numberOfPackages ; i++) {
 		received = 0;

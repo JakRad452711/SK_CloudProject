@@ -26,13 +26,14 @@ int main(int argc, char** argv) {
 	int namedPipeSend;
 	int namedPipeReceive;	
 	int portNumber;
+	int sizeOfSockaddr_in;
 	int socketFd;
 	char buffer[BUFFER_SIZE];
 	char* ipAddress;
 	char* remainingCharacters;
 	struct sockaddr_in endpoint;
-
-	puts("TCP client program started");
+	
+	puts("\n\n\nTCP client program started");
 
 	if(argc < 3) {
 		puts("(TCP client) too few arguments were entered");
@@ -40,10 +41,10 @@ int main(int argc, char** argv) {
 		return ERROR_BAD_ARGUMENTS;
 	}
 
-
 	ipAddress = argv[1];
 	remainingCharacters = NULL;
 	portNumber = (int) strtol(argv[2], &remainingCharacters, 10);
+	sizeOfSockaddr_in = sizeof(struct sockaddr_in);
 
 	if(argv[2] == remainingCharacters || portNumber < 0 || portNumber > 65535) {
 		puts("(TCP client) wrong port number was entered");
@@ -64,7 +65,7 @@ int main(int argc, char** argv) {
 		return ERROR_SOCKET;
 	} puts("(TCP client) socket prepared");
 	
-	if(connect(socketFd, (struct sockaddr*) &endpoint, sizeof(struct sockaddr_in) < 0)) {
+	if(connect(socketFd, (struct sockaddr*) &endpoint, sizeOfSockaddr_in) < 0) {
 			puts("(TCP client) a connect error occured");
 			return ERROR_CONNECT;
 	} puts("(TCP client) after connect");
@@ -75,11 +76,13 @@ int main(int argc, char** argv) {
 	} puts("(TCP client) named pipes prepared");
 
 	while(1) {
+		puts("(TCP client) on while start");
+		
 		// get initial request form from java module
 		if(receiveDataThroughThePipe(namedPipeReceive, buffer, BUFFER_SIZE) != 0) {
 			puts("(TCP client) receiving data through a pipe failed");
 			continue;
-		}
+		} printf("(TCP client) received through a pipe:\n%s\n", buffer);
 
 		char* aForm = buffer;
 
@@ -87,13 +90,13 @@ int main(int argc, char** argv) {
 		if(sendRequestFormTCP(socketFd, aForm, BUFFER_SIZE) != 0) {
 			puts("(TCP client) sending a form failed");
 			continue;
-		} 
+		}
 
 		// get response from the server
 		if(receiveResponseFormTCP(socketFd, buffer, BUFFER_SIZE) != 0) {
 			puts("(TCP client) receiving response failed");
 			continue;
-		}
+		} printf("(TCP client) received from the server:\n%s\n", buffer);
 
 		char* response = buffer;
 
@@ -106,15 +109,16 @@ int main(int argc, char** argv) {
 		memset(buffer, 0, BUFFER_SIZE);
 
 		// get an action from the java module
-		if(receiveDataThroughThePipe(namedPipeReceive, buffer, sizeof(int)) != 0) {
+		if(receiveDataThroughThePipe(namedPipeReceive, buffer, 4 * sizeof(char)) != 0) {
 			puts("(TCP client) receiving data through a pipe failed (2)");
 			continue;
 		}
 
 		action = (int) strtol(buffer, &remainingCharacters, 10);
+		printf("(TCP client) received an action:%d\n", action);
 
-		if(buffer == remainingCharacters || action < -6 || action > 0) {
-			puts("(TCP client) wrong port number was entered");
+		if(buffer == remainingCharacters || action < 100 || action > 300 || action % 100 != 0) {
+			puts("(TCP client) wrong action was entered");
 			return ERROR_WRONG_INPUT;
 		}
 		
@@ -125,6 +129,7 @@ int main(int argc, char** argv) {
 		// execute the action
 		switch(action) {
 			case TCP_RECEIVE_FILE: {
+				puts("(TCP client) TCP_RECEIVE_FILE");
 				
 				char saveToLocation[BUFFER_SIZE];
 			 // char* defaultDownloadLocation; (declaration is right before the switch statement)
@@ -144,7 +149,7 @@ int main(int argc, char** argv) {
 				if(receiveDataThroughThePipe(namedPipeReceive, buffer, BUFFER_SIZE) != 0) {
 					puts("(TCP client) receiving data through a pipe failed (4)");
 					continue;
-				}
+				} 
 				
 				sprintf(saveToLocation, "%s", buffer);
 				
@@ -154,17 +159,23 @@ int main(int argc, char** argv) {
 					continue;
 				}
 				
+				char* filePath = connectStrings(defaultDownloadLocation, saveToLocation, "");
+				
 				// download the file
-				if(downloadFileTCP(socketFd, fileName, strcat(defaultDownloadLocation, saveToLocation), fileSize, BUFFER_SIZE) != 0) {
+				if(downloadFileTCP(socketFd, fileName, filePath, fileSize, BUFFER_SIZE) != 0) {
 					puts("(TCP client) download file error occured");
 				}
 				else {
-					printf("(TCP client) a file was downloaded:\n%s\n", strcat(strcat(defaultDownloadLocation, saveToLocation), fileName));
-				}
+					free(filePath);
+					filePath = connectStrings(defaultDownloadLocation, saveToLocation, fileName);
+					printf("(TCP client) a file was downloaded:\n%s\n", filePath);
+				} free(filePath);
 				
 			}	break;
 			
 			case TCP_SEND_FILE: {
+				puts("(TCP client) TCP_SEND_FILE");
+				
 				char uploadFrom[BUFFER_SIZE];
 				FILE* sentFile;
 				
@@ -200,10 +211,21 @@ int main(int argc, char** argv) {
 			}	break;
 
 			case TCP_CONTINUE: {
+				puts("(TCP client) TCP_CONTINUE");
 				continue;
 			}
 		}
 	}
+}
+
+char* connectStrings(char* str1, char* str2, char* str3) {
+	int sizeOfAllStrings = sizeof(str1) + sizeof(str2) + sizeof(str3);
+	char* returnString;
+	
+	returnString = malloc(sizeOfAllStrings + 1);
+	sprintf(returnString, "%s%s%s", str1, str2, str3);
+	
+	return returnString;
 }
 
 int handleNamedPipes(int* namedPipeSend, int* namedPipeReceive) {
@@ -285,11 +307,16 @@ int downloadFileTCP(int socketFd, char* fileName, char* saveToLocation, long fil
 	int numberOfPackages;
 	int received;
 	char buffer[bufferSizeInBytes];
+	char* filePath;
 	FILE* newFile;
 	
 	numberOfPackages = ceil((double) fileSize / (double) bufferSizeInBytes);
-	if((newFile = fopen(strcat(saveToLocation, fileName), "wb")) == NULL)
+	filePath = connectStrings(saveToLocation, fileName, "");
+	
+	if((newFile = fopen(filePath, "w")) == NULL)
 		return ERROR_OPEN_FILE;
+	
+	free(filePath);
 	
 	for(int i=0 ; i<numberOfPackages ; i++) {
 		received = 0;

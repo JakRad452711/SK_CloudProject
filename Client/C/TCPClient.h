@@ -4,6 +4,12 @@
 // this library contains headers for functions used in a TCPClient program.
 */
 
+// returns string created from concatenating str1, str2 and str3
+// str1, str2, str3 values are not changed in process
+// after use allocated memory needs to be freed
+// to free memory you need to do: "free(variableToWhichYouSavedTheString);"
+char* connectStrings(char* str1, char* str2, char* str3);
+
 // opens pipes created by c# module and saves their descriptors to variables
 // returns 0 on success, or other values if an error occures
 int handleNamedPipes(int* namedPipeCToJavaFd, int* namedPipeJavaToCFd);
