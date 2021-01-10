@@ -79,11 +79,10 @@ int main(int argc, char** argv) {
 		puts("(TCP client) on while start");
 				
 		// get initial request form from java module
-		if(strlen(buffer) == 0)
-			if(receiveDataThroughThePipe(namedPipeReceive, buffer, BUFFER_SIZE) != 0) {
-				puts("(TCP client) receiving data through a pipe failed");
-				continue;
-			} printf("(TCP client) received through a pipe:\n%s\n", buffer);
+		if(receiveDataThroughThePipe(namedPipeReceive, buffer, BUFFER_SIZE) != 0) {
+			puts("(TCP client) receiving data through a pipe failed");
+			continue;
+		} printf("(TCP client) received through a pipe:\n%s\n", buffer);
 
 		char* aForm = buffer;
 
