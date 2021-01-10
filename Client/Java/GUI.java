@@ -372,6 +372,8 @@ public class GUI implements ActionListener , ListSelectionListener {
 				frame.getContentPane().removeAll();
 				secondPanel();
 								
+				uploadButton.setEnabled(false);
+				
 				frame.repaint();
 				frame.setVisible(true);
 				
