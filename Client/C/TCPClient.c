@@ -69,20 +69,21 @@ int main(int argc, char** argv) {
 			puts("(TCP client) a connect error occured");
 			return ERROR_CONNECT;
 	} puts("(TCP client) after connect");
-
+	
 	if(handleNamedPipes(&namedPipeSend, &namedPipeReceive) != 0) {
-		puts("(TCP client) named pipes error occured");
-		return ERROR_PIPES;
+			puts("(TCP client) named pipes error occured");
+			return ERROR_PIPES;
 	} puts("(TCP client) named pipes prepared");
 
 	while(1) {
 		puts("(TCP client) on while start");
-		
+				
 		// get initial request form from java module
-		if(receiveDataThroughThePipe(namedPipeReceive, buffer, BUFFER_SIZE) != 0) {
-			puts("(TCP client) receiving data through a pipe failed");
-			continue;
-		} printf("(TCP client) received through a pipe:\n%s\n", buffer);
+		if(strlen(buffer) == 0)
+			if(receiveDataThroughThePipe(namedPipeReceive, buffer, BUFFER_SIZE) != 0) {
+				puts("(TCP client) receiving data through a pipe failed");
+				continue;
+			} printf("(TCP client) received through a pipe:\n%s\n", buffer);
 
 		char* aForm = buffer;
 
@@ -152,6 +153,7 @@ int main(int argc, char** argv) {
 				} 
 				
 				sprintf(saveToLocation, "%s", buffer);
+				memset(buffer, 0, BUFFER_SIZE);
 				
 				// get the files' size in bytes
 				if(receiveFileSizeTCP(socketFd, &fileSize) != 0) {
@@ -215,6 +217,7 @@ int main(int argc, char** argv) {
 				continue;
 			}
 		}
+		memset(buffer, 0, BUFFER_SIZE); 
 	}
 }
 
@@ -239,8 +242,9 @@ int handleNamedPipes(int* namedPipeSend, int* namedPipeReceive) {
 }
 
 int receiveDataThroughThePipe(int aPipe, char* buffer, int bufferSizeInBytes) {
-	if(read(aPipe, buffer, bufferSizeInBytes) < 0)
-		return ERROR_READ;
+	int numOfBytes = 0;
+	while(numOfBytes != bufferSizeInBytes)
+		numOfBytes += read(aPipe, buffer + numOfBytes, bufferSizeInBytes - numOfBytes);
 
 	return 0;
 }

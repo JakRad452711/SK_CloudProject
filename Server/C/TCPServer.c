@@ -214,7 +214,7 @@ int main(int argc, char** argv) {
 					
 					if(
 						canUserPerformTheAction &&
-						strcmp(actionType, "UPLOAD") == 0 && 
+						strcmp(actionType, "UPLOAD") == 0 &&
 						!strstr(saveToLocation, ".") && 
 						!strstr(saveToLocation, "~") &&
 						!strstr(fileName, "/")
@@ -323,12 +323,6 @@ int main(int argc, char** argv) {
 							// send the file
 							if(sendFileTCP(connection, sentFile, BUFFER_SIZE) != 0) {
 								puts("(TCP server) send file failed.");
-								continue;
-							}
-							
-							// get response from the server
-							if(receiveRequestFormTCP(connection, buffer, BUFFER_SIZE) != 0) {
-								puts("(TCP server) receiving response failed (2)");
 								continue;
 							}
 														
