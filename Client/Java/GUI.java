@@ -399,6 +399,14 @@ public class GUI implements ActionListener , ListSelectionListener {
 				
 				writerPipe.write(sent);
 
+				received = readerPipe.read();
+				response = new char[4096];
+				
+				
+				for(int i=0 ; i<received.length ; i++)
+					response[i] = (char) received[i];
+				
+				
 				responseAnswer = response.toString();
 				responseAnswerSplit = responseAnswer.split("\n");
 				part1 = responseAnswerSplit[0];
@@ -465,9 +473,9 @@ public class GUI implements ActionListener , ListSelectionListener {
 				//tutaj stuff do przekazania fifo (fifo write)
 				
 				passw = passwordText.getText();
+				String test = uploadTextField.getText();
 				
-				
-				toSendString = userNameSendString+ "\n" + passw +"\nDOWNLOAD\n/\n"+uploadTextField.getText();
+				toSendString = userNameSendString+ "\n" + passw +"\nUPLOAD\n/\n"+ test;
 				
 				toSendChar = toSendString.toCharArray();
 				sent = new byte[4096];
@@ -476,6 +484,13 @@ public class GUI implements ActionListener , ListSelectionListener {
 					sent[i] = (byte) toSendChar[i];
 				
 				writerPipe.write(sent);
+				
+				received = readerPipe.read();
+				response = new char[4096];
+				
+				
+				for(int i=0 ; i<received.length ; i++)
+					response[i] = (char) received[i];
 				
 				responseAnswer = response.toString();
 				responseAnswerSplit = responseAnswer.split("\n");
@@ -497,7 +512,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 					writerPipe.write(sentAction);
 					
 					///////////////////
-					toSendStringUpPathName = "/"+uploadTextField.getText();
+					toSendStringUpPathName = "/"+test;
 					
 					toSendCharUpPathName = toSendStringUpPathName.toCharArray();
 					sentUpPathName = new byte[4096];
