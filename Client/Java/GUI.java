@@ -194,7 +194,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 		panelSuccess.add(filesText);
 		
 		
-		File myObj = new File(".files");
+		File myObj = new File("./CloudProjectDownloaded/.files");
 	  
 		try {
 			myFileReader = new Scanner(myObj);
@@ -596,6 +596,16 @@ public class GUI implements ActionListener , ListSelectionListener {
 					
 				writerPipe.write(sentAction);
 					
+
+				for(int i=0 ; i<received.length ; i++)
+					response[i] = (char) received[i];
+				
+				responseAnswer = response.toString();
+				responseAnswerSplit = responseAnswer.split("\n");
+				part1 = responseAnswerSplit[0];
+				part2 = responseAnswerSplit[1];
+				if(part1.equals("ACCEPTED"))
+				{
 				////////////////////
 				toSendStringDownName =".files";
 				
@@ -621,7 +631,11 @@ public class GUI implements ActionListener , ListSelectionListener {
 				
 				writerPipe.write(sentDownPath);
 				 
-				
+				}
+				else
+				{
+					JOptionPane.showMessageDialog(null,part2,"Błąd connecta",JOptionPane.INFORMATION_MESSAGE);
+				}
 				 //jesli będzie potrzebny komunikat związany z nie przyjęciem do portu
 				 
 					/*
