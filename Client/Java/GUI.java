@@ -68,7 +68,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 	private static String responseAnswer;
 	private static String part1;
 	private static String part2;
-	private static String[] responseAnswerSplit;
+	private static String responseAnswerSplit;
 	private static String userNameSendString;
 	private static  byte [] bytesIntCommand ;
 	private static JTextField ipField;
@@ -326,20 +326,12 @@ public class GUI implements ActionListener , ListSelectionListener {
 				
 				writerPipe.write(sent);
 				received = readerPipe.read();
-				response = new char[4096];
+				responseAnswer = new String (received);
 				
 				
-				for(int i=0 ; i<received.length ; i++)
-					response[i] = (char) received[i];
+				responseAnswerSplit = responseAnswer.substring(0, 8);
 				
-				
-				responseAnswer = new String(received, Charset.defaultCharset());
-				
-				responseAnswerSplit = responseAnswer.split("\n");
-				part1 = responseAnswerSplit[0];
-				
-				
-				if(part1.equals("ACCEPTED"))
+				if(responseAnswerSplit.equals("ACCEPTED"))
 				{
 					frame.getContentPane().removeAll();
 					secondPanel();
@@ -405,20 +397,13 @@ public class GUI implements ActionListener , ListSelectionListener {
 				writerPipe.write(sent);
 
 				received = readerPipe.read();
-				response = new char[4096];
+				responseAnswer = new String (received);
 				
 				
-				for(int i=0 ; i<received.length ; i++)
-					response[i] = (char) received[i];
-				
-				
-				responseAnswer = new String(received, Charset.defaultCharset());
-				
-				responseAnswerSplit = responseAnswer.split("\n");
-				part1 = responseAnswerSplit[0];
+				responseAnswerSplit = responseAnswer.substring(0, 8);
 				
 			
-				if( part1.equals("ACCEPTED")) 
+				if( responseAnswerSplit.equals("ACCEPTED")) 
 				{
 					toSendStringAction = "300";
 					
@@ -493,20 +478,16 @@ public class GUI implements ActionListener , ListSelectionListener {
 				writerPipe.write(sent);
 				
 				received = readerPipe.read();
-				response = new char[4096];
+				
+				// java array to string
+				responseAnswer = new String (received);
 				
 				
-				for(int i=0 ; i<received.length ; i++)
-					response[i] = (char) received[i];
-				responseAnswer = new String(received, Charset.defaultCharset());
-				
-				responseAnswerSplit = responseAnswer.split("\n");
-				part1 = responseAnswerSplit[0];
+				responseAnswerSplit = responseAnswer.substring(0, 8);
 				
 				
 				
-				
-				if(part1.equals("ACCEPTED"))
+				if(responseAnswerSplit.equals("ACCEPTED"))
 				{
 					toSendStringAction = "200";
 					
@@ -610,16 +591,16 @@ public class GUI implements ActionListener , ListSelectionListener {
 					
 				received = readerPipe.read();
 				response = new char[4096];
-				for(int i=0 ; i<received.length ; i++)
-					response[i] = (char) received[i];
+		
 				
 				
-				responseAnswer = new String(received, Charset.defaultCharset());
+				responseAnswer = new String (received);
+				
 			
-				responseAnswerSplit = responseAnswer.split("\n");
-				part1 = responseAnswerSplit[0];
+				responseAnswerSplit = responseAnswer.substring(0, 8);
 				
-				if(part1.equals("ACCEPTED"))
+				
+				if(responseAnswerSplit.equals("ACCEPTED"))
 				{
 				////////////////////
 				toSendStringDownName =".files";
