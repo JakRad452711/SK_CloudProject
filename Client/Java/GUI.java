@@ -335,7 +335,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 				responseAnswer = response.toString();
 				responseAnswerSplit = responseAnswer.split("\n");
 				part1 = responseAnswerSplit[0];
-				part2 = responseAnswerSplit[1];
+				
 				if(part1.equals("ACCEPTED"))
 				{
 					frame.getContentPane().removeAll();
@@ -346,7 +346,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 				}
 				else
 				{
-					JOptionPane.showMessageDialog(null,part2,"Błąd logowania",JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(null,"TEST BŁĘDU LOGOWANIA","Błąd logowania",JOptionPane.INFORMATION_MESSAGE);
 				}
 					
 					
@@ -412,7 +412,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 				responseAnswer = response.toString();
 				responseAnswerSplit = responseAnswer.split("\n");
 				part1 = responseAnswerSplit[0];
-				part2 = responseAnswerSplit[1];
+			
 				if( part1.equals("ACCEPTED")) 
 				{
 					toSendStringAction = "300";
@@ -464,7 +464,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 						
 
 				
-					JOptionPane.showMessageDialog(null,part2,"Błąd pobierania",JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(null,"Pobieranie nie powiodło się","Błąd pobierania",JOptionPane.INFORMATION_MESSAGE);
 				}
 					
 				
@@ -497,7 +497,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 				responseAnswer = response.toString();
 				responseAnswerSplit = responseAnswer.split("\n");
 				part1 = responseAnswerSplit[0];
-				part2 = responseAnswerSplit[1];
+	
 				
 				
 				
@@ -539,7 +539,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 						
 					
 				
-					JOptionPane.showMessageDialog(null,part2,"Błąd dodania",JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(null,"Dodawanie pliku na serwer nie powiodło się","Błąd dodania",JOptionPane.INFORMATION_MESSAGE);
 				}
 				
 			}
@@ -553,6 +553,13 @@ public class GUI implements ActionListener , ListSelectionListener {
 				{
 						
 				}
+				File toClose = null;
+                toClose = new File(".CloudProjectNamedPipeCToJava");
+                toClose.delete();
+                toClose = new File(".CloudProjectNamedPipeJavaToC");
+                toClose.delete();
+				
+				
 				System.exit(0);
 				  
 			}
@@ -604,7 +611,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 				responseAnswer = response.toString();
 				responseAnswerSplit = responseAnswer.split("\n");
 				part1 = responseAnswerSplit[0];
-				part2 = responseAnswerSplit[1];
+				
 				if(part1.equals("ACCEPTED"))
 				{
 				////////////////////
@@ -635,7 +642,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 				}
 				else
 				{
-					JOptionPane.showMessageDialog(null,part2,"Błąd connecta",JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(null,"Nie udało się połączyć z serwerem","Błąd połączenia",JOptionPane.INFORMATION_MESSAGE);
 				}
 				 //jesli będzie potrzebny komunikat związany z nie przyjęciem do portu
 				 
