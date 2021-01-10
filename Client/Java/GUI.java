@@ -596,7 +596,8 @@ public class GUI implements ActionListener , ListSelectionListener {
 					
 				writerPipe.write(sentAction);
 					
-
+				received = readerPipe.read();
+				response = new char[4096];
 				for(int i=0 ; i<received.length ; i++)
 					response[i] = (char) received[i];
 				
