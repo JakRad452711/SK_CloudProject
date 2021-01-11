@@ -173,6 +173,7 @@ int main(int argc, char** argv) {
 							) && 
 							strcmp(userFileLineField, "n") == 0
 						)	canUserPerformTheAction = 1;
+						
 					} puts("(TCP server) after checking user's credentials");
 					
 					free(userCredentialsFileLine);
@@ -181,7 +182,7 @@ int main(int argc, char** argv) {
 					canTheActionBePerformed = 0;
 					
 					if(!canUserPerformTheAction) {
-						puts("(TCP server) can't perform an action");
+						puts("(TCP server) a user can't perform an action");
 						sprintf(buffer, "DENIED\nUser can't perform the action");
 					}
 
@@ -255,7 +256,7 @@ int main(int argc, char** argv) {
 							puts("(TCP server) TCP_RECEIVE_FILE");
 							
 							// char fileName[BUFFER_SIZE]; (declaration on the beginning of internal while)
-							char saveToLocation[BUFFER_SIZE];
+							// char saveToLocation[BUFFER_SIZE]; (declaration on the beginning of internal while)
 							// char* defaultStorageLocation; (declaration is right before the switch statement)
 							// char* filePath; (declaration on the beginning of internal while)
 							// FILE* fileWithFileNames; (declaration on the beginning of internal while)
@@ -266,7 +267,7 @@ int main(int argc, char** argv) {
 								continue;
 							}
 							
-							filePath = connectStrings(defaultStorageLocation, saveToLocation, "");
+							filePath = connectStrings(defaultStorageLocation, saveToLocation, fileName);
 							
 							// download the file
 							if(receiveFileTCP(connection, fileName, filePath, fileSize, BUFFER_SIZE) != 0) {
@@ -274,12 +275,9 @@ int main(int argc, char** argv) {
 								free(filePath);
 							}
 							else {
-								free(filePath);
-								filePath = connectStrings(defaultStorageLocation, saveToLocation, fileName);
 
 								printf("(TCP server) a file was downloaded:\n%s\n", filePath);
 								
-								free(filePath);
 								filePath = connectStrings(defaultStorageLocation, FILE_NAMES, "");
 								
 								// if suceeded create new path in the file containing available files
