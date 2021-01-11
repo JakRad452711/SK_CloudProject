@@ -267,32 +267,30 @@ int main(int argc, char** argv) {
 								continue;
 							}
 							
-							filePath = connectStrings(defaultStorageLocation, saveToLocation, fileName);
+							filePath = connectStrings(defaultStorageLocation, saveToLocation, "");
 							
 							// download the file
 							if(receiveFileTCP(connection, fileName, filePath, fileSize, BUFFER_SIZE) != 0) {
 								puts("(TCP server) download file error occured");
-								free(filePath);
 							}
 							else {
 
-								printf("(TCP server) a file was downloaded:\n%s\n", filePath);
+								printf("(TCP server) a file was downloaded:\n%s%s\n", filePath, fileName);
+
+								free(filePath);
 								
-								filePath = connectStrings(defaultStorageLocation, FILE_NAMES, "");
+								filePath = connectStrings(defaultStorageLocation, "/", FILE_NAMES);
 								
 								// if suceeded create new path in the file containing available files
 								if((fileWithFileNames = fopen(filePath, "a")) == NULL) {
 									puts("(TCP server) fopen failed (2)");
 									continue;
-								} free(filePath);
+								}
 								
-								filePath = connectStrings(saveToLocation, fileName, "\n");
+								fprintf(fileWithFileNames, "%s\n", fileName);
 								
-								fputs(filePath, fileWithFileNames);
-									
-								free(filePath);
 								fclose(fileWithFileNames);
-							}
+							} free(filePath);
 														
 						} break;
 						
