@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 
 public class PipeClass {
+	private static int numOfDownloads = 0;
 	String namedPipeLocation;
 	RandomAccessFile namedPipe;
 	
@@ -32,12 +33,14 @@ public class PipeClass {
 	public byte[] read() {
 		int length = 0;
 		
-		while(size() != 4096) {
-			try { TimeUnit.MILLISECONDS.sleep(250); } 
+		while(size() != ((numOfDownloads + 1) * 4096)) {
+			try { TimeUnit.MILLISECONDS.sleep(50); } 
 			catch (Exception e1) { e1.printStackTrace(); }
 		}
 		
 		byte[] line = new byte[4096];
+		
+		numOfDownloads ++;
 		
 		try {
 			namedPipe.read(line); 
