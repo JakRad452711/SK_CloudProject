@@ -18,8 +18,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -70,7 +68,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 	private static String responseAnswer;
 	private static String part1;
 	private static String part2;
-	private static String responseAnswerSplit;
+	private static String responseAnswerSplit[];
 	private static String userNameSendString;
 	private static  byte [] bytesIntCommand ;
 	private static JTextField ipField;
@@ -98,10 +96,9 @@ public class GUI implements ActionListener , ListSelectionListener {
 	
 	public static void frameSetUp () 
 	{
-		
 		panel = new JPanel();
 		frame = new JFrame();
-		frame.setSize(1000,700);
+		frame.setSize(500,700);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.add(panel);
 	}
@@ -112,58 +109,62 @@ public class GUI implements ActionListener , ListSelectionListener {
 		panel.setLayout(null);
 		
 		userLabel = new JLabel ("Użytkownik");
-		userLabel.setBounds (10,20,80,25);
+  		userLabel.setBounds (10,170,80,25);
 		panel.add(userLabel);
 		
 		
 		userText = new  JTextField (30);
-		userText.setBounds (100,20,165,25);
+		userText.setBounds (100,170,165,25);
 		panel.add(userText);
 		
 		passwordLabel = new JLabel ("Hasło");
-		passwordLabel.setBounds (10,50,80,25);
+		passwordLabel.setBounds (10,200,80,25);
 		panel.add(passwordLabel);
 		
 		passwordText = new JPasswordField ();
-		passwordText.setBounds(100,50,165,25);
+   		passwordText.setBounds(100,200,165,25);
 		panel.add(passwordText);
 		
 		loginButton = new JButton("Zaloguj");
-		loginButton.setBounds(10,80,130,25);
+		loginButton.setBounds(10,230,150,25);
 		loginButton.addActionListener (new GUI());
+		loginButton.setEnabled(false);
 		panel.add(loginButton);
 		
 		guestButton = new JButton ("Wejdz jako gość");
-		guestButton.setBounds(180,80,130,25);
+		guestButton.setBounds(10,260,150,25);
 		guestButton.addActionListener (new GUI());
+		guestButton.setEnabled(false);
 		panel.add(guestButton);
 		
 		
 		closeButton = new JButton("Exit");
 		closeButton.addActionListener(new GUI());
-		closeButton.setBounds(300,300, 130,25);
+		closeButton.setBounds(10,300, 150,25);
 		panel.add(closeButton);
 		
 		ipLabel = new JLabel("Ip serwera");
-		ipLabel.setBounds(10,170,80,25);
+		ipLabel.setBounds(10,20,80,25);
 		panel.add(ipLabel);
 		
 		ipField = new JTextField(30);
-		ipField.setBounds(100,170,165,25);
+		ipField.setBounds(100,20,165,25);
 		panel.add(ipField);
 		
 		portLabel = new JLabel ("Port serwera");
-		portLabel.setBounds(10,200,80,25);
+		portLabel.setBounds(10,50,80,25);
 		panel.add(portLabel);
 		
 		portField = new JTextField(30);	
-		portField.setBounds(100,200,165,25);
+		portField.setBounds(100,50,165,25);
 		panel.add(portField);
 		
 		connectButton = new JButton("Połącz z serwerem");
-		connectButton.setBounds(100,230,150,25);
+		connectButton.setBounds(10,80,150,25);
 		connectButton.addActionListener(new GUI());
 		panel.add(connectButton);
+		
+		
 		
 		frame.setVisible(true);
 		
@@ -265,11 +266,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 	public static void main(String[] args) throws IOException {
 		///STWORENIE PLIKÓW DO FIFO
 
-		File toClose = null;
-        toClose = new File(".CloudProjectNamedPipeCToJava");
-        toClose.delete();
-        toClose = new File(".CloudProjectNamedPipeJavaToC");
-        toClose.delete();
+	 
 		
 		readerPipe = new PipeClass(".CloudProjectNamedPipeCToJava");
 		writerPipe = new PipeClass(".CloudProjectNamedPipeJavaToC");
@@ -301,7 +298,8 @@ public class GUI implements ActionListener , ListSelectionListener {
        fileNameToGive = downloadTextLabel.getText();
         //if     fileToDownload.endsWith("/");
           // wyswietlam zawartosc katalogu	
-        
+
+
     } 
 	
 
@@ -330,13 +328,14 @@ public class GUI implements ActionListener , ListSelectionListener {
 				
 				writerPipe.write(sent);
 				received = readerPipe.read();
-				System.out.println((char) received[0]);
 				responseAnswer = new String (received);
 				
 				
-				responseAnswerSplit = responseAnswer.substring(0, 8);
-				System.out.println(responseAnswer);
-				if(responseAnswerSplit.equals("ACCEPTED"))
+				responseAnswerSplit = responseAnswer.split("\n");
+				part1 = responseAnswerSplit[0];
+				part2 = responseAnswerSplit[1];
+				
+				if(part1.equals("ACCEPTED"))
 				{
 					frame.getContentPane().removeAll();
 					secondPanel();
@@ -346,7 +345,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 				}
 				else
 				{
-					JOptionPane.showMessageDialog(null,"TEST BŁĘDU LOGOWANIA","Błąd logowania",JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(null,part2,"Błąd logowania",JOptionPane.INFORMATION_MESSAGE);
 				}
 					
 					
@@ -384,6 +383,11 @@ public class GUI implements ActionListener , ListSelectionListener {
 				
 				
 				
+				passw = passwordText.getText();
+
+
+		
+				
 				toSendString = userNameSendString+ "\n" + passw +"\nDOWNLOAD\n/\n"+fileNameToGive;
 				
 				toSendChar = toSendString.toCharArray();
@@ -400,10 +404,12 @@ public class GUI implements ActionListener , ListSelectionListener {
 				responseAnswer = new String (received);
 				
 				
-				responseAnswerSplit = responseAnswer.substring(0, 8);
+				responseAnswerSplit = responseAnswer.split("\n");
+				part1 = responseAnswerSplit[0];
+				part2 = responseAnswerSplit[1];
 				
 			
-				if( responseAnswerSplit.equals("ACCEPTED")) 
+				if( part1.equals("ACCEPTED")) 
 				{
 					toSendStringAction = "300";
 					
@@ -454,7 +460,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 						
 
 				
-					JOptionPane.showMessageDialog(null,"Pobieranie nie powiodło się","Błąd pobierania",JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(null,part2,"Błąd pobierania",JOptionPane.INFORMATION_MESSAGE);
 				}
 					
 				
@@ -464,9 +470,10 @@ public class GUI implements ActionListener , ListSelectionListener {
 			{
 				//tutaj stuff do przekazania fifo (fifo write)
 				
-				String test = uploadTextField.getText();
+				passw = passwordText.getText();
+				String uploadFileText = uploadTextField.getText();
 				
-				toSendString = userNameSendString+ "\n" + passw +"\nUPLOAD\n/\n"+ test;
+				toSendString = userNameSendString+ "\n" + passw +"\nUPLOAD\n/\n"+ uploadFileText;
 				
 				toSendChar = toSendString.toCharArray();
 				sent = new byte[4096];
@@ -482,11 +489,11 @@ public class GUI implements ActionListener , ListSelectionListener {
 				responseAnswer = new String (received);
 				
 				
-				responseAnswerSplit = responseAnswer.substring(0, 8);
+				responseAnswerSplit = responseAnswer.split("\n");
+				part1 = responseAnswerSplit[0];
+				part2 = responseAnswerSplit[1];
 				
-				
-				
-				if(responseAnswerSplit.equals("ACCEPTED"))
+				if(part1.equals("ACCEPTED"))
 				{
 					toSendStringAction = "200";
 					
@@ -499,7 +506,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 					writerPipe.write(sentAction);
 					
 					///////////////////
-					toSendStringUpPathName = "/"+test;
+					toSendStringUpPathName = "./"+ uploadFileText;
 					
 					toSendCharUpPathName = toSendStringUpPathName.toCharArray();
 					sentUpPathName = new byte[4096];
@@ -524,7 +531,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 						
 					
 				
-					JOptionPane.showMessageDialog(null,"Dodawanie pliku na serwer nie powiodło się","Błąd dodania",JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(null,part2,"Błąd dodania",JOptionPane.INFORMATION_MESSAGE);
 				}
 				
 			}
@@ -590,15 +597,17 @@ public class GUI implements ActionListener , ListSelectionListener {
 					
 				received = readerPipe.read();
 				response = new char[4096];
-					
+		
+				
 				
 				responseAnswer = new String (received);
 				
 			
-				responseAnswerSplit = responseAnswer.substring(0, 8);
+				responseAnswerSplit = responseAnswer.split("\n");
+				part1 = responseAnswerSplit[0];
+				part2 = responseAnswerSplit[1];
 				
-				
-				if(responseAnswerSplit.equals("ACCEPTED"))
+				if(part1.equals("ACCEPTED"))
 				{
 				////////////////////
 				toSendStringDownName =".files";
@@ -625,10 +634,12 @@ public class GUI implements ActionListener , ListSelectionListener {
 				
 				writerPipe.write(sentDownPath);
 				 
+				guestButton.setEnabled(true);
+				loginButton.setEnabled(true);
 				}
 				else
 				{
-					JOptionPane.showMessageDialog(null,"Nie udało się połączyć z serwerem","Błąd połączenia",JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(null,part2,"Błąd połączenia",JOptionPane.INFORMATION_MESSAGE);
 				}
 				 //jesli będzie potrzebny komunikat związany z nie przyjęciem do portu
 				 
