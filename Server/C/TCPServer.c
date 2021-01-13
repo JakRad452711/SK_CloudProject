@@ -349,13 +349,25 @@ char* connectStrings(char* str1, char* str2, char* str3) {
 }
 
 int sendResponseFormTCP(int socketFd, char* aForm, int formSizeInBytes) {
-	if(send(socketFd, aForm, formSizeInBytes, 0) < 0)
-		return ERROR_SEND;
+	int sent;
+	int sendValue;
+	
+	sent = 0;
+	
+	while(sent < formSizeInBytes) {
+		if((sendValue = send(socketFd, aForm, formSizeInBytes, 0)) < 0)
+			return ERROR_SEND;
+			
+		sent += sendValue;
+	}
 
 	return 0;
 }
 
 int sendFileSizeTCP(int socketFd, FILE* aFile, long maxSizeInBytes) {
+	int sent;
+	int sendValue;
+	
 	fseek(aFile, 0, SEEK_END);
 	long fileSize = ftell(aFile);
 	fseek(aFile, 0, SEEK_SET);
@@ -363,12 +375,22 @@ int sendFileSizeTCP(int socketFd, FILE* aFile, long maxSizeInBytes) {
 	if(maxSizeInBytes > maxSizeInBytes)
 		return ERROR_FILE_SIZE;
 
-	send(socketFd, &fileSize, sizeof(long), 0);
+	sent = 0;
+	
+	while(sent < sizeof(long)) {
+		if((sendValue = send(socketFd, &fileSize, sizeof(long), 0)) < 0)
+			return ERROR_SEND;
+			
+		sent += sendValue;
+	}
 	
 	return 0;
 }
 
 int sendFileTCP(int socketFd, FILE* aFile, int bufferSizeInBytes) {
+	int sent;
+	int sendValue;
+	
 	fseek(aFile, 0, SEEK_END);
 	long fileSize = ftell(aFile);
 	fseek(aFile, 0, SEEK_SET);
@@ -379,22 +401,48 @@ int sendFileTCP(int socketFd, FILE* aFile, int bufferSizeInBytes) {
 	for(int i=0 ; i<numberOfPackages ; i++) {
 		memset(buffer, 0, bufferSizeInBytes);
 		fread(buffer, 1, bufferSizeInBytes, aFile);
-		send(socketFd, buffer, bufferSizeInBytes, 0);
+		
+		sent = 0;
+		
+		while(sent < bufferSizeInBytes) {
+			if((sendValue = send(socketFd, buffer, bufferSizeInBytes, 0)) < 0)
+				return ERROR_SEND;
+			
+			sent += sendValue;
+		}
 	}
 
 	return 0;
 }
 
 int receiveRequestFormTCP(int socketFd, char* buffer, int formSizeInBytes) {
-	if(recv(socketFd, buffer, formSizeInBytes, 0) < 0)
-		return ERROR_RECEIVE;
+	int received;
+	int recvValue;
+	
+	received = 0;
+	
+	while(received < formSizeInBytes) {
+		if((recvValue = recv(socketFd, buffer + received, formSizeInBytes - received, 0)) < 0)
+			return ERROR_RECEIVE;
+			
+		received += recvValue;
+	}
 
 	return 0;
 }
 
 int receiveFileSizeTCP(int socketFd, long* fileSize) {
-	if(recv(socketFd, fileSize, sizeof(long), 0) < 0)
-		return ERROR_RECEIVE;
+	int received;
+	int recvValue;
+	
+	received = 0;
+	
+	while(received < sizeof(long)) {
+		if((recvValue = recv(socketFd, fileSize + received, sizeof(long) - received, 0)) < 0)
+			return ERROR_RECEIVE;
+		
+		received += recvValue;
+	}
 		
 	if(*fileSize > MAX_FILE_SIZE) {
 		return ERROR_FILE_SIZE;
@@ -406,6 +454,7 @@ int receiveFileSizeTCP(int socketFd, long* fileSize) {
 int receiveFileTCP(int socketFd, char* fileName, char* saveToLocation, long fileSize, int bufferSizeInBytes) {
 	int numberOfPackages;
 	int received;
+	int recvValue;
 	char buffer[bufferSizeInBytes];
 	char* filePath;
 	FILE* newFile;
@@ -422,7 +471,10 @@ int receiveFileTCP(int socketFd, char* fileName, char* saveToLocation, long file
 		received = 0;
 		
 		while(received < bufferSizeInBytes) {
-			received += recv(socketFd, buffer + received, bufferSizeInBytes - received, 0);
+			if((recvValue = recv(socketFd, buffer + received, bufferSizeInBytes - received, 0)) < 0)
+				return ERROR_RECEIVE;
+			
+			received += recvValue;
 		}
 
 		int packageLength = ((i == (numberOfPackages - 1)) ? fileSize % bufferSizeInBytes : bufferSizeInBytes);
