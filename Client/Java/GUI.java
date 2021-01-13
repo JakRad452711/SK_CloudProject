@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -515,7 +517,104 @@ public class GUI implements ActionListener , ListSelectionListener {
 						sentUpPathName[i] = (byte) toSendCharUpPathName[i];
 					
 					writerPipe.write(sentUpPathName);
+					
+					// Getting ".files" file again
+					try { TimeUnit.MILLISECONDS.sleep(125);
+					} catch (InterruptedException e1) {
+						e1.printStackTrace(); 
+					}
+					
+					toSendString = "Guest\n123\nDOWNLOAD\n/\n.files";
+					
+					toSendChar = toSendString.toCharArray();
+					sent = new byte[4096];
+					
+					for(int i=0 ; i<toSendChar.length ; i++)
+						sent[i] = (byte) toSendChar[i];
+					
+					writerPipe.write(sent);
+					
+					received = readerPipe.read();
+					response = new char[4096];
+
+					responseAnswer = new String (received);
+
+					responseAnswerSplit = responseAnswer.split("\n");
+					part1 = responseAnswerSplit[0];
+					part2 = responseAnswerSplit[1];
+					
+					if(part1.equals("ACCEPTED"))
+					{
+						toSendStringAction = "300";
 						
+						toSendCharAction = toSendStringAction.toCharArray();
+						sentAction = new byte[4];
+							
+						for(int i=0 ; i<toSendCharAction.length ; i++)
+							sentAction[i] = (byte) toSendCharAction[i];
+							
+						writerPipe.write(sentAction);
+						////////////////////
+						toSendStringDownName =".files";
+						
+						toSendCharDownName = toSendStringDownName.toCharArray();
+						sentDownName = new byte[4096];
+						
+						for(int i=0 ; i<toSendCharDownName.length ; i++)
+							sentDownName[i] = (byte) toSendCharDownName[i];
+
+						writerPipe.write(sentDownName);
+						///////////////////////////////////
+						toSendStringDownPath = "/";
+						
+						toSendCharDownPath = toSendStringDownPath.toCharArray();
+						sentDownPath = new byte[4096];
+						
+						for(int i=0 ; i<toSendCharDownPath.length ; i++)
+							sentDownPath[i] = (byte) toSendCharDownPath[i];
+
+						writerPipe.write(sentDownPath);
+						
+						File myObj = new File("./CloudProjectDownloaded/.files");
+						
+						try {
+							myFileReader = new Scanner(myObj);
+						} catch (FileNotFoundException e2) {
+							
+							e2.printStackTrace();
+						}
+					      
+					
+								 //while( input fifo)
+						// string
+						//TUTAJ DAĆ czytanie pliku READ I PRZYPISAC DO pliki STUFF
+						ArrayList <String> filesNamesList = new ArrayList<>();; 
+						while(myFileReader.hasNextLine()) 
+						{
+							filesNamesList.add(myFileReader.nextLine());
+						}
+						myFileReader.close();
+						
+						files = new String [filesNamesList.size()];
+						int j=0;
+						for (String z : filesNamesList) {
+						    files[j] = z;
+						    j++;
+						}
+						
+						panelSuccess.remove(list);
+						
+						list = new JList(files);
+						list.setBounds(50,150,150,6000);
+						
+						list.addListSelectionListener(new GUI()); 
+						
+						panelSuccess.remove(list);
+						panelSuccess.add(list);
+						
+						frame.repaint();
+						frame.setVisible(true);
+					}
 				}
 				else
 				{
@@ -585,15 +684,7 @@ public class GUI implements ActionListener , ListSelectionListener {
 					e1.printStackTrace();
 				 }
 				 
-				toSendStringAction = "300";
-					
-				toSendCharAction = toSendStringAction.toCharArray();
-				sentAction = new byte[4];
-					
-				for(int i=0 ; i<toSendCharAction.length ; i++)
-					sentAction[i] = (byte) toSendCharAction[i];
-					
-				writerPipe.write(sentAction);
+				
 					
 				received = readerPipe.read();
 				response = new char[4096];
@@ -609,36 +700,54 @@ public class GUI implements ActionListener , ListSelectionListener {
 				
 				if(part1.equals("ACCEPTED"))
 				{
-				////////////////////
-				toSendStringDownName =".files";
-				
-				toSendCharDownName = toSendStringDownName.toCharArray();
-				sentDownName = new byte[4096];
-				
-				for(int i=0 ; i<toSendCharDownName.length ; i++)
-					sentDownName[i] = (byte) toSendCharDownName[i];
-				
-				
-				
-				writerPipe.write(sentDownName);
-				///////////////////////////////////
-				toSendStringDownPath = "/";
-				
-				toSendCharDownPath = toSendStringDownPath.toCharArray();
-				sentDownPath = new byte[4096];
-				
-				for(int i=0 ; i<toSendCharDownPath.length ; i++)
-					sentDownPath[i] = (byte) toSendCharDownPath[i];
-				
-				
-				
-				writerPipe.write(sentDownPath);
-				 
-				guestButton.setEnabled(true);
-				loginButton.setEnabled(true);
+					toSendStringAction = "300";
+					
+					toSendCharAction = toSendStringAction.toCharArray();
+					sentAction = new byte[4];
+						
+					for(int i=0 ; i<toSendCharAction.length ; i++)
+						sentAction[i] = (byte) toSendCharAction[i];
+						
+					writerPipe.write(sentAction);
+					////////////////////
+					toSendStringDownName =".files";
+					
+					toSendCharDownName = toSendStringDownName.toCharArray();
+					sentDownName = new byte[4096];
+					
+					for(int i=0 ; i<toSendCharDownName.length ; i++)
+						sentDownName[i] = (byte) toSendCharDownName[i];
+					
+					
+					
+					writerPipe.write(sentDownName);
+					///////////////////////////////////
+					toSendStringDownPath = "/";
+					
+					toSendCharDownPath = toSendStringDownPath.toCharArray();
+					sentDownPath = new byte[4096];
+					
+					for(int i=0 ; i<toSendCharDownPath.length ; i++)
+						sentDownPath[i] = (byte) toSendCharDownPath[i];
+					
+					
+					
+					writerPipe.write(sentDownPath);
+					 
+					guestButton.setEnabled(true);
+					loginButton.setEnabled(true);
 				}
 				else
 				{
+					toSendStringAction = "100";
+					
+					toSendCharAction = toSendStringAction.toCharArray();
+					sentAction = new byte[4];
+						
+					for(int i=0 ; i<toSendCharAction.length ; i++)
+						sentAction[i] = (byte) toSendCharAction[i];
+						
+					writerPipe.write(sentAction);
 					JOptionPane.showMessageDialog(null,part2,"Błąd połączenia",JOptionPane.INFORMATION_MESSAGE);
 				}
 				 //jesli będzie potrzebny komunikat związany z nie przyjęciem do portu
